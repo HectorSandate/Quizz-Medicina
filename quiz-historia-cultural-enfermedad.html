@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Historia Cultural de la Enfermedad</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Historia Cultural de la Enfermedad</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {q:"¿Qué propone el autor como alternativa a la Historia Natural de la Enfermedad (HNE)?",options:["Historia Biológica de la Enfermedad","Historia Cultural de la Enfermedad (HCE)","Historia Social de la Enfermedad","Historia Moderna de la Enfermedad"],correct:1,time:20},
+            {q:"¿Cuál es el libro que fue decisivo para que el concepto de HNE se volviera predominante en 1953?",options:["Historia Naturalis de Plinio","\"Preventive medicine for the doctor in his community\" de Leavell y Clark","El origen de las especies","Tratado de medicina"],correct:1,time:30},
+            {q:"Según el autor, ¿qué son las enfermedades?",options:["Solo alteraciones biológicas","Formas de ser particulares y diferenciadas de los seres humanos","Únicamente patologías genéticas","Desviaciones temporales"],correct:1,time:30},
+            {q:"¿Qué autor propone el paradigma de disyunción, reducción y simplificación según el documento?",options:["Charles Darwin","E. Morin","Sigmund Freud","Karl Marx"],correct:1,time:20},
+            {q:"¿Qué caracteriza al paradigma según E. Morin?",options:["Es consciente para quienes lo viven","Su presencia es inconsciente, está incorporado a la percepción como \"la realidad\"","Es fácilmente modificable","No influye en el pensamiento"],correct:1,time:30},
+            {q:"¿Cuál es el efecto más notorio de la lógica de disyunción según el paradigma occidental?",options:["Unión de conceptos","Separación del sujeto con respecto al objeto","Integración total","Eliminación de barreras"],correct:1,time:30},
+            {q:"¿Qué tres conceptos interrelacionados comprende la idea moderna de enfermedad?",options:["Social, económico, político","Ontológico, fisiológico, patológico","Temporal, espacial, cultural","Individual, colectivo, ambiental"],correct:1,time:30},
+            {q:"¿Qué concepto de enfermedad destaca su carácter como entidad u objeto independiente del portador?",options:["Concepto fisiológico","Concepto ontológico","Concepto patológico","Concepto social"],correct:1,time:20},
+            {q:"¿Cómo surgió el concepto de salud según el documento?",options:["Como concepto independiente","Como lo opuesto a la enfermedad (\"la no enfermedad\")","Como estado natural","Como construcción moderna"],correct:1,time:20},
+            {q:"¿Qué es el paradigma salud/enfermedad (PSE)?",options:["Solo una teoría médica","Paradigma que gobierna saberes y quehaceres del cuidado de la salud","Una propuesta alternativa","Un concepto obsoleto"],correct:1,time:30},
+            {q:"Según el PSE, ¿cómo se conciben las enfermedades?",options:["Como procesos naturales","Como desviaciones de patrones funcionales/estructurales de la salud y como entidades objetivas","Como construcciones sociales","Como estados temporales"],correct:1,time:30},
+            {q:"¿Qué compara el mecanicismo con el organismo según el documento?",options:["Con un ecosistema","Con una máquina","Con una sociedad","Con la naturaleza"],correct:1,time:20},
+            {q:"¿Qué efecto tiene la \"medicalización\" de la vida según el autor?",options:["Mejora la salud","Genera obsesión por salud, fobia a enfermedades y dependencia de saber heterónomo","Previene enfermedades","Reduce costos"],correct:1,time:30},
+            {q:"¿Qué es el \"iatrocentrismo\"?",options:["Enfoque en el paciente","Centralidad de \"lo médico\" que minimiza necesidades reales de pacientes/usuarios","Medicina preventiva","Cuidado holístico"],correct:1,time:30},
+            {q:"Según el autor, ¿qué \"toma las riendas de la evolución\" en nuestra especie?",options:["La genética","La cultura (todo lo que nos hace humanos)","El ambiente","La biología"],correct:1,time:20},
+            {q:"¿Qué cualidad distingue a los organismos vivos del mundo inanimado?",options:["Son inmóviles","Son autopoiéticos (se auto-producen sin cesar)","Son estáticos","Son simples"],correct:1,time:30},
+            {q:"¿Qué es el \"entorno\" según el autor?",options:["Solo el ambiente físico","Entramado de interacciones selectivas específicas del organismo con el ambiente","El clima","El hábitat natural"],correct:1,time:30},
+            {q:"¿Qué es la \"anticipación\" como cualidad de la vida?",options:["Predecir el futuro","Proceso de interiorización de relaciones con el ambiente que permite surgimiento de nuevas interacciones","Planificación consciente","Evolución genética"],correct:1,time:30},
+            {q:"¿Cómo se expresa la evolución en nuestra especie según el documento?",options:["Por mutaciones genéticas","Por sucesión de ambientes culturales que condicionan formas de ser","Por selección natural","Por adaptación física"],correct:1,time:30},
+            {q:"¿Qué ejemplo usa el autor sobre la etnia Pima y la diabetes tipo 2?",options:["Solo factor genético","Variante genética que era ventaja (saludable) se transformó en factor patogénico por cambio de ambiente cultural","Solo factor ambiental","Enfermedad inevitable"],correct:1,time:30},
+            {q:"¿Qué pregunta hace el autor sobre el ejemplo de la etnia Pima?",options:["¿Cómo curarlos?","¿Qué es la salud? ¿Qué de \"natural\" tiene la historia de la enfermedad de esta etnia?","¿Cuántos están enfermos?","¿Dónde viven?"],correct:1,time:30},
+            {q:"¿Qué dicotomía cada vez más insostenible discute el autor?",options:["Agudo/crónico","Congénito/adquirido","Físico/mental","Individual/colectivo"],correct:1,time:20},
+            {q:"¿Qué es la herencia epigenética?",options:["Solo herencia genética","Transmisión hereditaria de modificaciones de patrones de regulación epigenética no dependiente del ADN","Mutaciones espontáneas","Herencia cultural"],correct:1,time:30},
+            {q:"Ejemplo de herencia epigenética en humanos según el documento:",options:["Color de ojos","Violencia intrafamiliar en ancestros predispone a comportamiento antisocial en descendientes","Altura","Tipo de sangre"],correct:1,time:30},
+            {q:"¿Qué muestra la herencia epigenética según el autor?",options:["Solo importa lo genético","Es evidencia fuerte contra la separación entre lo genético y lo ambiental","No existe","Es irrelevante"],correct:1,time:30},
+            {q:"Característica de la causalidad mecanicista propia de la HNE:",options:["Compleja y multidimensional","Puntual, inmediata, homogénea, lineal, unidireccional, fija, reduccionista","Contextual y holística","Cultural y dinámica"],correct:1,time:30},
+            {q:"¿Qué propone el autor como alternativa a la causalidad mecanicista?",options:["Causalidad genética","Causalidad contextual","Causalidad ambiental","Causalidad simple"],correct:1,time:20},
+            {q:"Característica de la causalidad contextual:",options:["Puntual y fija","Difusa, pausada, heterogénea, jerárquica, envolvente, multidireccional, cambiante, transdisciplinaria","Simple y directa","Unidimensional"],correct:1,time:30},
+            {q:"¿Qué significa que la causalidad contextual es \"difusa\"?",options:["No existe","Historia, tradiciones, relaciones influyen de manera abarcadora, no circunscrita (atmósferas y ambientes)","Es confusa","No se puede medir"],correct:1,time:30},
+            {q:"¿Qué significa que la causalidad contextual es \"heterogénea\"?",options:["Todo es igual","Coexisten órdenes causales diversos: histórico, social, político, económico, ideológico, psicológico, biológico","Solo un tipo de causa","Causas uniformes"],correct:1,time:30},
+            {q:"¿Qué significa que la causalidad contextual es \"transdisciplinaria\"?",options:["Solo una disciplina","Explicación causal es problema teórico que requiere diversos enfoques disciplinarios entrelazados","No necesita disciplinas","Solo medicina"],correct:1,time:30},
+            {q:"¿De qué dependen el tipo y forma de ser de las instituciones de salud según el autor?",options:["Solo del gobierno","Del nivel de participación colectiva (autogestión hacia vida digna) en la comunidad","Del presupuesto","De la tecnología"],correct:1,time:30},
+            {q:"¿Qué papel predomina actualmente en el paciente según el PSE?",options:["Protagonista activo","Predominantemente pasivo e individualista","Líder del proceso","Decisor principal"],correct:1,time:20},
+            {q:"¿Qué debe despertar el trabajador de salud en el paciente según la HCE?",options:["Miedo a la enfermedad","Motivación para entender, aceptar y asumir su enfermedad","Dependencia del médico","Resignación"],correct:1,time:30},
+            {q:"¿Qué aspecto es clave para que el paciente mejore según el documento?",options:["Solo medicamentos","Entender y aceptar enfermedad como otra forma de ser que debe asumirse con cambios en forma de vivir","Solo cirugías","Esperar pasivamente"],correct:1,time:30},
+            {q:"¿Qué ejemplo emblemático de organización de pacientes menciona el autor?",options:["Cruz Roja","Alcohólicos Anónimos","OMS","Hospital público"],correct:1,time:20},
+            {q:"¿Por qué Alcohólicos Anónimos logra lo que la institución de salud no puede según el autor?",options:["Tiene más dinero","Confiere sentido de identidad, es garante de intereses/necesidades de miembros (autonomía), encarna compasión/fraternidad/solidaridad","Tiene mejor tecnología","Es más grande"],correct:1,time:30},
+            {q:"¿Qué deberían ser las comunidades autónomas de pacientes en el futuro según la HCE?",options:["Complemento secundario","\"Estrategia primaria de atención a la salud\" de enfermos crónicos","Solo apoyo emocional","Grupos de terapia"],correct:1,time:30},
+            {q:"¿Qué frase usa el autor al final pensando en los pacientes?",options:["La enfermedad es inevitable","\"La enfermedad es forma de ser que no podemos elegir; debemos entenderla, asumirla y aprender a vivir con ella\"","Las enfermedades son castigo","La salud es lo único importante"],correct:1,time:30},
+            {q:"¿Qué reconoce el autor sobre la vida en su expresión biológica en nuestra especie?",options:["Ocurre independiente","No ocurre como tal, sino a través de lo cultural de la época","Es puramente natural","No tiene importancia"],correct:1,time:30},
+            {q:"¿Qué determina la cultura según el autor respecto a los genes?",options:["Nada","Determina qué genes se combinan (afinidades culturales) y cuáles se activan/inactivan (herencia epigenética)","Solo las mutaciones","La selección natural"],correct:1,time:30},
+            {q:"¿Qué son necesarias pero insuficientes las aportaciones de la HNE según el autor?",options:["Para todo","Para aspectos principalmente técnicos, pero insuficientes para ahondar en cualidad de la vida","Para investigación","Para diagnóstico"],correct:1,time:30},
+            {q:"¿Qué expresa principalmente el \"estado de salud\" de individuos y poblaciones?",options:["Solo genética","Su ubicación en relaciones sociales desiguales que definen condiciones de vida más o menos favorables","Solo ambiente","La suerte"],correct:1,time:30},
+            {q:"¿Qué se trata entonces según el autor (el problema de las enfermedades crónicas)?",options:["Solo problema médico","Problema principalmente político (relaciones de poder) con expresión en el campo de la salud","Solo problema biológico","Problema individual"],correct:1,time:30},
+            {q:"¿Qué carece de sentido sin el cuidado de la vida según la frase del autor?",options:["La medicina","El cuidado de la salud","Los hospitales","La investigación"],correct:1,time:20},
+            {q:"¿Qué es cuidar la vida según el autor?",options:["Solo evitar enfermedades","Procurar dignidad, satisfacción, serenidad, fraternidad; pretender ambiente social pluralista, incluyente, igualitario, justo y solidario","Solo hacer ejercicio","Tomar medicinas"],correct:1,time:30},
+            {q:"¿Qué debe ser el verdadero fundamento de la \"lucha contra enfermedades crónicas\"?",options:["Más hospitales","Participación social hacia condiciones de existencia favorables para vida digna en sociedades incluyentes y solidarias","Más medicamentos","Más tecnología"],correct:1,time:30},
+            {q:"¿Qué NO propone el autor respecto a la HNE?",options:["Su mejora","Su desaparición (no es posible ni deseable)","Su actualización","Su complemento"],correct:1,time:20},
+            {q:"¿Qué puede aportar la HCE que la HNE no permite?",options:["Solo lo mismo","Puede explicar lo que HNE permite PERO ADEMÁS enriquece percepción y arroja luz sobre aspectos ignorados","Menos información","Nada nuevo"],correct:1,time:30},
+            {q:"¿Qué representa la HCE según el epílogo?",options:["Continuidad de lo mismo","Un viraje en forma de mirar salud/enfermedad que ubica raíz de problemas más allá de lo biológico","Retroceso","Solo teoría sin aplicación"],correct:1,time:30}
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,665 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Globalización y Neoliberalismo</title>
+    <h6>te amo</h6>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Globalización, Neoliberalismo y Mundialización</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué es la globalización según el documento?",
+                options: ["Solo integración económica", "Proceso histórico de integración mundial en ámbitos económico, político, tecnológico, social y cultural", "Únicamente intercambio comercial", "Solo comunicación entre países"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué metáfora se utiliza para describir el mundo globalizado?",
+                options: ["Una ciudad global", "Un continente interconectado", "Una aldea global", "Un mercado único"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué ha generado la disolución progresiva de las fronteras económicas?",
+                options: ["Disminución del comercio", "Expansión capitalista", "Aislamiento económico", "Reducción de inversiones"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿La globalización es un fenómeno planetario porque...",
+                options: ["Solo ocurre en algunos continentes", "Se manifiesta en todo el mundo", "Afecta únicamente a países desarrollados", "Solo impacta el comercio"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Por qué la globalización es DESIGUAL Y ASIMÉTRICA?",
+                options: ["Afecta a todos por igual", "Repercute de formas muy diferentes según nivel de desarrollo y cuota de poder mundial", "Solo beneficia a países pobres", "No tiene diferencias entre países"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿De qué depende fundamentalmente la globalización?",
+                options: ["Solo de la política", "De la conectividad y las telecomunicaciones", "Solo del comercio", "Únicamente de la cultura"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál NO es una ventaja de la globalización según el documento?",
+                options: ["Mayor acceso a la información", "Desarrollo tecnológico", "Aumento del turismo", "Concentración del capital en multinacionales"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Cuál es una desventaja de la globalización?",
+                options: ["Desarrollo de mercado global", "Incapacidad del Estado nacional como ente de control", "Mayor acceso a educación", "Intercambio cultural"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de las inversiones internacionales van a naciones en desarrollo?",
+                options: ["10%", "Solo 25%", "50%", "75%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es una causa inmediata de la globalización?",
+                options: ["Aumento de fronteras", "El fin de la Guerra Fría", "Disminución del comercio", "Aislamiento político"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué revolución fue fundamental para el surgimiento de la globalización?",
+                options: ["Revolución agrícola", "Revolución en telecomunicaciones e informática", "Revolución política", "Revolución demográfica"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la globalización económica?",
+                options: ["Control estatal del comercio", "Creación de mercado mundial sin barreras arancelarias para libre circulación de capitales", "Aumento de impuestos", "Cierre de fronteras"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué son los bloques económicos?",
+                options: ["Barreras comerciales", "Países que se asocian para fomentar relaciones comerciales (Ej: Mercosur, UE)", "Monopolios internacionales", "Organizaciones militares"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué ha fomentado la globalización política?",
+                options: ["Aislamiento de países", "Creación de instituciones internacionales como la ONU para problemas globales", "Eliminación de gobiernos", "Guerras comerciales"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué abarca la globalización tecnológica?",
+                options: ["Solo Internet", "Acceso a información, Internet, medios de comunicación, avances en industria y salud", "Solo teléfonos móviles", "Únicamente redes sociales"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué aspecto NEGATIVO tiene la globalización cultural?",
+                options: ["Difusión de valores universales", "Mayor acceso a información", "Grupos sociales pequeños afectados por consumo cultural de mayor alcance y pérdida de valores propios", "Intercambio cultural"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué caracteriza a la globalización social?",
+                options: ["Discriminación por clase", "Defensa de igualdad y justicia para todos los seres humanos sin importar clase, religión o cultura", "Segregación cultural", "Separación de grupos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuándo se suele señalar que tuvo inicio la globalización?",
+                options: ["Siglo XXI", "Llegada de Colón a América (finales siglo XV) y colonización europea", "Segunda Guerra Mundial", "Revolución Francesa"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuándo adquirió la globalización su forma plena?",
+                options: ["Siglo XIX", "Segunda mitad del siglo XX", "Siglo XXI", "Primera Guerra Mundial"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es el neoliberalismo?",
+                options: ["Teoría socialista", "Teoría político-económica que retoma liberalismo clásico con principios más radicales", "Sistema comunista", "Economía planificada"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Como qué surge el neoliberalismo?",
+                options: ["Apoyo al Estado benefactor", "Reacción a la intervención del Estado como garante de justicia social", "Defensa del comunismo", "Promoción del socialismo"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Según el neoliberalismo, ¿qué debería hacer el Estado?",
+                options: ["Controlar toda la economía", "Cumplir solo funciones fundamentales y oponerse a intervenir en economía", "Aumentar regulaciones", "Nacionalizar empresas"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué favorece el neoliberalismo?",
+                options: ["Nacionalización de empresas", "Privatización de empresas y servicios del sector público", "Control estatal total", "Aumento del gasto social"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Quiénes fueron los principales ideólogos del neoliberalismo?",
+                options: ["Karl Marx y Engels", "Friedrich August von Hayek y Milton Friedman", "Adam Smith y Ricardo", "Keynes y Samuelson"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué líderes fueron de los primeros en implementar políticas neoliberales?",
+                options: ["Churchill y Roosevelt", "Reagan (EE.UU.), Thatcher (Reino Unido), Pinochet (Chile)", "Stalin y Mao", "De Gaulle y Adenauer"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la relación entre neoliberalismo y globalización?",
+                options: ["Son opuestos", "No tienen relación", "Son procesos complementarios (globalización crea condiciones para neoliberalismo)", "El neoliberalismo elimina la globalización"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué propone el neoliberalismo respecto al libre mercado?",
+                options: ["Control de precios por el Estado", "Mercado funciona bajo ley de oferta y demanda, precios acordados entre compradores y vendedores", "Precios fijos", "Subsidios generalizados"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué crítica se hace a la flexibilidad laboral neoliberal?",
+                options: ["Aumenta salarios", "Puede traer contratos desventajosos, bajos salarios, ausencia de beneficios", "Beneficia a todos", "Fortalece sindicatos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué crítica existe sobre la privatización de servicios públicos?",
+                options: ["Reduce precios", "Puede traducirse en tarifas más altas perjudicando sectores vulnerables", "Beneficia a pobres", "Mejora acceso universal"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuándo surge el neoliberalismo en México?",
+                options: ["Década de 1960", "Década de 1980 con Miguel de la Madrid", "Década de 2000", "Década de 1970"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué tratado firmó México en los años 90 relacionado con neoliberalismo?",
+                options: ["Tratado de Versalles", "Tratado de Libre Comercio con EE.UU. y Canadá (TLCAN)", "Tratado de Roma", "Tratado del Pacífico"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la mundialización?",
+                options: ["Lo mismo que globalización", "Proceso que estandariza integración de sociedades y actividades económicas con perspectiva mayor que globalización", "Solo comercio internacional", "Únicamente política mundial"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la diferencia entre mundialización y globalización?",
+                options: ["Son idénticas", "Mundialización tiene alcance mundial mayor; globalización son procesos más específicos del capitalismo", "Globalización es más amplia", "No hay diferencia"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la glocalización?",
+                options: ["Solo globalización", "Adaptación de patrones globales a condiciones locales", "Solo localización", "Rechazo a lo global"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Quiénes adoptaron primero la metodología de glocalización?",
+                options: ["Estadounidenses en los 60", "Europeos en los 70", "Empresarios japoneses en los años 80 (\"dochakuka\")", "Chinos en los 90"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué significa \"dochakuka\" en japonés?",
+                options: ["Comercio global", "\"El que vive de su propia tierra\"", "Expansión internacional", "Mercado único"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Ejemplo de glocalización de Pepsico en España:",
+                options: ["Vendió Pepsi sin cambios", "Adquirió empresa local \"Kas\" cuando \"Mirinda\" no tuvo aceptación", "Cerró operaciones", "Solo exportó productos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cómo McDonald's aplica glocalización?",
+                options: ["Menú idéntico mundial", "Ajusta menús a gustos locales (patatas con bacalao en Japón, McCroquetas en España)", "Solo vende hamburguesas", "No adapta productos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Quién es Gustavo Lins Ribeiro?",
+                options: ["Economista mexicano", "Antropólogo sociocultural brasileño especializado en transnacionalismo", "Político argentino", "Empresario chileno"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué temas se especializa Gustavo Lins Ribeiro?",
+                options: ["Solo economía", "Transnacionalismo, migraciones internacionales, cibercultura, antropologías mundiales", "Solo política", "Únicamente historia"],
+                correct: 1,
+                time: 30
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

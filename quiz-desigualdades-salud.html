@@ -1,0 +1,449 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Desigualdades en Salud</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Desigualdades en Salud</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {q:"¿Cómo se distribuyen las enfermedades según el documento?",options:["Por el azar","Están profundamente determinadas por la estructura social, política y económica","De forma aleatoria","Solo por factores genéticos"],correct:1,time:30},
+            {q:"¿Qué término se utiliza para traducir \"inequity in Health\" del inglés?",options:["Diferencia en salud","Desigualdad SOCIAL en salud","Variación sanitaria","Disparidad médica"],correct:1,time:20},
+            {q:"Según el Diccionario de la RAE, ¿qué dos significados tiene \"Iniquidad\"?",options:["Desigualdad y pobreza","Injusticia grande y maldad","Error y equivocación","Diferencia y contraste"],correct:1,time:20},
+            {q:"¿Qué son las desigualdades en la salud según el documento?",options:["Diferencias naturales inevitables","Diferencias sistemáticas y potencialmente evitables en uno o más aspectos de la salud","Solo diferencias genéticas","Variaciones normales"],correct:1,time:30},
+            {q:"¿Cómo se definen las poblaciones o grupos poblacionales en las desigualdades de salud?",options:["Solo por edad","Social, económica, demográfica o geográficamente","Solo por género","Únicamente por ubicación"],correct:1,time:30},
+            {q:"¿Cuántas condiciones deben darse para que una diferencia sea considerada DSS (Desigualdad Social en Salud)?",options:["Una condición","Dos condiciones","Tres condiciones","Cuatro condiciones"],correct:1,time:20},
+            {q:"¿Cuáles son las DOS condiciones para que una diferencia sea considerada DSS?",options:["Que sea cara y compleja","Que se la considere socialmente injusta Y que sea potencialmente evitable","Que sea visible y medible","Que afecte a muchos y sea grave"],correct:1,time:30},
+            {q:"En el esquema de Margaret Whitehead, ¿qué determinante NO es potencialmente evitable NI inaceptable?",options:["Hábitos nocivos libremente elegidos","Variaciones biológicas o naturales","Acceso restringido a cuidados","Exposición a riesgos"],correct:1,time:30},
+            {q:"Según Whitehead, ¿qué determinante SÍ es potencialmente evitable pero NO inaceptable?",options:["Exposición excesiva a riesgos","Hábitos nocivos libremente elegidos","Acceso restringido a servicios","Variaciones biológicas"],correct:1,time:30},
+            {q:"¿Qué determinantes son TANTO potencialmente evitables COMO inaceptables según Whitehead?",options:["Solo los biológicos","Hábitos restringidos por factores socioeconómicos, exposición excesiva a riesgos, acceso restringido a servicios, movilidad social descendente","Solo los genéticos","Ninguno"],correct:1,time:30},
+            {q:"¿Cuál es la PRIMERA política más efectiva según el documento?",options:["Mejoras en hospitales","Papel de las políticas macroeconómicas en varios frentes","Más medicamentos","Campañas publicitarias"],correct:1,time:20},
+            {q:"¿Qué incluye el papel de las políticas macroeconómicas según el documento?",options:["Solo reducir impuestos","Reducción diferencias en ingresos, reducción desempleo, inversión en bienes físicos y sociales","Solo crear empleos","Solo construir infraestructura"],correct:1,time:30},
+            {q:"¿Qué tipo de impuestos se mencionan para reducir diferencias en ingresos?",options:["Impuestos regresivos","Impuestos progresivos","Impuestos únicos","Sin impuestos"],correct:1,time:20},
+            {q:"¿Qué ejemplos de \"bienes físicos\" menciona el documento para inversión?",options:["Solo tecnología","Infraestructuras de servicios sanitarios, de transporte, de seguridad social","Solo edificios","Solo carreteras"],correct:1,time:30},
+            {q:"¿Qué ejemplos de \"bienes sociales\" menciona el documento?",options:["Solo dinero","Educación, participación de sociedad civil, programas comunitarios en zonas de nivel socioeconómico bajo","Solo escuelas","Solo hospitales"],correct:1,time:30},
+            {q:"¿Cuál es la SEGUNDA política más efectiva?",options:["Más tecnología médica","Mejoras de las condiciones de trabajo y vivienda, especialmente las reformas","Solo aumentar salarios","Solo construir casas"],correct:1,time:30},
+            {q:"¿Cuál es la TERCERA acción efectiva según el documento?",options:["Solo campañas mediáticas","Reducir distribución desigual de factores de riesgo conductuales, dirigidas a grupos más afectados","Solo prohibir hábitos","Solo educar en general"],correct:1,time:30},
+            {q:"¿Cuál es la CUARTA intervención efectiva?",options:["Privatizar servicios","Intervenciones en y desde el sistema sanitario","Solo prevención","Solo tratamiento"],correct:1,time:20},
+            {q:"¿Cuál es la intervención PRINCIPAL desde el sistema sanitario según el documento?",options:["Más hospitales privados","Mantenimiento de sistema de atención sanitaria universal, financiado mediante impuestos","Solo seguro privado","Solo atención de emergencia"],correct:1,time:30},
+            {q:"¿A qué debe estar atento el sistema sanitario universal según el documento?",options:["Solo a las ganancias","A la accesibilidad geográfica, económica y cultural","Solo a la tecnología","Solo a la eficiencia"],correct:1,time:30},
+            {q:"En resumen, ¿cuántas áreas menciona el documento para políticas de mejora?",options:["Tres áreas","Seis áreas","Cuatro áreas","Cinco áreas"],correct:1,time:20},
+            {q:"¿Qué factores impactan la distribución de salud y enfermedad según el concepto \"desigualdades en salud\"?",options:["Solo la edad","Riqueza, educación, ocupación, grupo racial/étnico, residencia urbana/rural, condiciones sociales del lugar donde se vive o trabaja","Solo el género","Solo la genética"],correct:1,time:30},
+            {q:"¿Qué es el soporte metodológico para identificar puntos de intervención según el documento?",options:["Solo estadísticas médicas","Estudio de características de la población y del área geográfica de residencia","Solo encuestas","Solo datos hospitalarios"],correct:1,time:30},
+            {q:"¿Qué es la vulnerabilidad según el documento?",options:["Solo debilidad física","Fenómeno histórico: conjunto de factores económicos, políticos y socioculturales que limitan capacidad de prevenir/responder ante infección","Solo falta de recursos","Solo mala suerte"],correct:1,time:30},
+            {q:"Según el documento, la vulnerabilidad:",options:["Es innata e inevitable","Es una condición que se adquiere y depende de las condiciones estructurales en que se desenvuelven las poblaciones","Es solo genética","No se puede cambiar"],correct:1,time:30}
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

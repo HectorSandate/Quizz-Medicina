@@ -1,0 +1,879 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Hipertensión Portal y Ascitis</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz: Hipertensión Portal y Ascitis</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué es la hipertensión portal según el Consenso Mexicano?",
+                options: ["Aumento de la bilirrubina sérica", "Aumento en el gradiente de presión portosistémica en cualquier segmento del sistema venoso portal", "Disminución del flujo sanguíneo hepático", "Obstrucción de la vena cava inferior"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué valor de gradiente de presión venosa hepática (GPVH) se considera hipertensión portal subclínica?",
+                options: ["Menor de 5 mm Hg", "Entre 6-9 mm Hg", "Entre 10-12 mm Hg", "Mayor de 15 mm Hg"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿A partir de qué valor de GPVH se considera clínicamente significativo con riesgo de complicaciones?",
+                options: ["Mayor de 5 mm Hg", "Mayor de 8 mm Hg", "Al menos 10 mm Hg", "Mayor de 15 mm Hg"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la principal causa de hipertensión portal?",
+                options: ["Trombosis de vena porta", "Cirrosis hepática (se presenta en hasta 90%)", "Síndrome de Budd-Chiari", "Esquistosomiasis"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En la clasificación de hipertensión portal, ¿qué significa hipertensión portal PREHEPÁTICA?",
+                options: ["Obstrucción en el hígado", "Obstrucción en la vena esplénica, porta o mesentérica (antes de llegar al hígado)", "Obstrucción en las venas hepáticas", "Obstrucción en la vena cava"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la principal causa de hipertensión portal INTRAHEPÁTICA?",
+                options: ["Trombosis de vena porta", "Síndrome de Budd-Chiari", "Cirrosis hepática", "Pericarditis constrictiva"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza a la hipertensión portal POSHEPÁTICA?",
+                options: ["Obstrucción antes del hígado", "Obstrucción en sinusoides", "Interrupción del flujo entre venas hepáticas y vena cava inferior", "Obstrucción de la vena porta"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el ejemplo más frecuente de hipertensión portal poshepática?",
+                options: ["Trombosis de vena porta", "Cirrosis", "Síndrome de Budd-Chiari", "Esquistosomiasis"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En la trombosis venosa portal no cirrótica, ¿cuál es la principal causa?",
+                options: ["Causas locales (30%)", "Trombofilia (principal causa, hereditaria)", "Anticonceptivos orales", "Neoplasias"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con trombosis venosa portal se debe a neoplasias mieloproliferativas?",
+                options: ["10%", "Alrededor de 25%", "50%", "70%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la sensibilidad y especificidad del ultrasonido Doppler para diagnóstico de trombosis venosa portal?",
+                options: ["50% y 60%", "60% y 70%", "73% y 93%", "90% y 95%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según el documento, ¿cuál es la cuarta causa de muerte en población general en México (2016)?",
+                options: ["Diabetes", "Enfermedades cardiovasculares", "Hipertensión portal (cirrosis hepática)", "Cáncer"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje del flujo sanguíneo al hígado constituye la arteria hepática?",
+                options: ["10%", "25%", "50%", "75%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje del flujo sanguíneo al hígado constituye la vena porta?",
+                options: ["25%", "50%", "75%", "90%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la causa principal del aumento de resistencia hepática en cirrosis?",
+                options: ["Inflamación aguda", "Alteraciones estructurales (fibrosis y nódulos regenerativos) y hemodinámicas", "Solo vasodilatación", "Trombosis intrahepática"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué caracteriza a la circulación hiperdinámica en hipertensión portal?",
+                options: ["Vasoconstricción periférica", "Vasodilatación periférica y esplácnica con disminución de presión arterial media", "Aumento de resistencia vascular", "Disminución del gasto cardíaco"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el principal vasodilatador responsable de la circulación hiperdinámica?",
+                options: ["Endotelina", "Angiotensina II", "Óxido nítrico", "Vasopresina"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿A partir de qué valor de elastografía hay riesgo de hipertensión portal clínicamente significativa?",
+                options: ["10 kPa", "15 kPa", "20 kPa", "25 kPa"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según Baveno VI, ¿en qué pacientes se recomienda endoscopia de escrutinio?",
+                options: ["Todos los cirróticos", "Elastografía ≥20 kPa y plaquetas <150,000", "Solo con ascitis", "Solo Child-Pugh C"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el objetivo del tratamiento en la profilaxis primaria de várices?",
+                options: ["Eliminar el GPVH completamente", "Reducir el GPVH 20% del valor basal o a <12 mm Hg", "Aumentar la presión portal", "Eliminar todas las várices"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el tratamiento de elección en profilaxis primaria de várices?",
+                options: ["Ligadura con bandas solamente", "Betabloqueadores no selectivos (BBNS)", "Escleroterapia", "TIPS inmediato"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis inicial de propranolol para profilaxis de várices?",
+                options: ["10 mg dos veces al día", "20 mg dos veces al día", "40 mg dos veces al día", "80 mg dos veces al día"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis máxima de propranolol?",
+                options: ["80 mg dos veces al día", "120 mg dos veces al día", "160 mg dos veces al día", "200 mg dos veces al día"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿A cuánto se debe reducir la frecuencia cardíaca con betabloqueadores?",
+                options: ["25% del basal, no más de 55 latidos/min", "30% del basal, no más de 60 latidos/min", "50% del basal, no más de 50 latidos/min", "40% del basal, no más de 70 latidos/min"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el fármaco vasoactivo de elección en hemorragia variceal?",
+                options: ["Somatostatina", "Octreótido", "Terlipresina (único que disminuye mortalidad)", "Vasopresina"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis inicial de terlipresina en hemorragia variceal?",
+                options: ["1 mg IV cada 4 horas", "2 mg IV cada 4 horas durante 48 horas", "3 mg IV cada 6 horas", "4 mg IV cada 8 horas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué porcentaje de casos el sangrado variceal remite espontáneamente?",
+                options: ["25%", "Hasta 50%", "75%", "90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes responden al tratamiento endoscópico y farmacológico?",
+                options: ["50%", "65%", "Hasta 85%", "95%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el rango de hemoglobina recomendado en hemorragia variceal?",
+                options: ["5-7 g/dl", "7-9 g/dl", "9-11 g/dl", "11-13 g/dl"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué antibiótico profiláctico se recomienda en hemorragia variceal?",
+                options: ["Amoxicilina", "Ciprofloxacino", "Ceftriaxona 1g IV c/24h o norfloxacino 400mg c/12h por 5-7 días", "Metronidazol"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el riesgo de resangrado en 2 años sin profilaxis secundaria?",
+                options: ["30-40%", "40-50%", "60-70%", "80-90%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué se recomienda en profilaxis secundaria de várices?",
+                options: ["Solo BBNS", "Solo ligadura con bandas", "BBNS + ligadura endoscópica (tratamiento combinado)", "Solo TIPS"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué significa TIPS?",
+                options: ["Terapia intrahepática portosistémica", "Cortocircuito portosistémico transyugular intrahepático", "Trombosis intrahepática portal sistémica", "Tratamiento invasivo portal sistémico"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿En qué porcentaje de casos el TIPS controla el sangrado?",
+                options: ["50%", "70%", "Más de 90%", "100%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es una contraindicación importante para TIPS?",
+                options: ["Várices pequeñas", "Encefalopatía hepática preexistente", "Edad menor de 50 años", "Plaquetas bajas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿A partir de qué GPVH existe riesgo de formación de várices?",
+                options: ["Mayor de 5 mm Hg", "Mayor de 8 mm Hg", "Mayor de 10 mm Hg", "Mayor de 15 mm Hg"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿A partir de qué GPVH existe riesgo de sangrado variceal?",
+                options: ["Mayor de 8 mm Hg", "Mayor de 10 mm Hg", "Mayor de 12 mm Hg", "Mayor de 15 mm Hg"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la prevalencia de várices gástricas en hipertensión portal?",
+                options: ["5%", "10%", "20%", "40%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según la clasificación de Sarin, ¿cómo se dividen las várices gástricas?",
+                options: ["Tipo 1 y 2 solamente", "Esofagogástricas (VEG tipo 1 y 2) y Gástricas aisladas (VGA tipo 1 y 2)", "Pequeñas, medianas y grandes", "Grado I, II, III, IV"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la incidencia de resangrado en várices gástricas?",
+                options: ["10-20%", "20-30%", "34-89%", "90-100%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué es la ascitis?",
+                options: ["Inflamación del peritoneo", "Acumulación de líquido en la cavidad peritoneal", "Distensión abdominal por gases", "Obstrucción intestinal"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántos grados de ascitis existen según clasificación?",
+                options: ["2 grados", "3 grados (Mínima, Moderada, Intensa)", "4 grados", "5 grados"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con cirrosis compensada desarrollan ascitis a 10 años?",
+                options: ["10-20%", "20-30%", "30-50%", "50-60%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la mortalidad a 2 años en pacientes cirróticos con ascitis?",
+                options: ["20%", "30%", "50%", "70%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la mortalidad a 6 meses en ascitis refractaria?",
+                options: ["25%", "50%", "75%", "90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué GPVH se requiere para formar líquido de ascitis?",
+                options: ["Mayor de 5 mm Hg", "Mayor de 8 mm Hg", "10 mm Hg a 12 mm Hg", "Mayor de 15 mm Hg"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el principal mecanismo de retención de sodio en ascitis?",
+                options: ["Insuficiencia renal", "Vasodilatación arterial esplácnica y sistémica que activa sistema renina-angiotensina-aldosterona", "Aumento de albúmina", "Hipernatremia"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué significa SAAG?",
+                options: ["Sistema de análisis de ascitis general", "Gradiente albúmina sérica/albúmina en ascitis", "Síndrome de acumulación de agua generalizada", "Scoring de ascitis avanzada grave"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué valor de SAAG indica hipertensión portal?",
+                options: ["SAAG < 1.1 g/dl", "SAAG = 1.1 g/dl", "SAAG > 1.1 g/dl", "SAAG > 2.5 g/dl"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la eficacia del SAAG para determinar si hay hipertensión portal?",
+                options: ["75%", "85%", "97%", "100%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué restricción de sal se recomienda en ascitis?",
+                options: ["Restricción severa (<40 mmol/día)", "Restricción moderada (80-120 mmol/día)", "Sin restricción", "Solo en casos graves"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Se recomienda restricción de líquidos en ascitis con sodio normal?",
+                options: ["Sí, siempre", "No, no hay evidencia suficiente", "Solo en Child-Pugh C", "Solo con hiponatremia severa"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el diurético de elección en ascitis?",
+                options: ["Furosemida solamente", "Hidroclorotiazida", "Espironolactona (antagonista de aldosterona)", "Amilorida"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis inicial sugerida de espironolactona + furosemida?",
+                options: ["50 mg + 20 mg", "100 mg + 40 mg", "200 mg + 80 mg", "400 mg + 160 mg"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis máxima de espironolactona?",
+                options: ["200 mg/día", "300 mg/día", "400 mg/día", "500 mg/día"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis máxima de furosemida en ascitis?",
+                options: ["80 mg/día", "120 mg/día", "160 mg/día", "200 mg/día"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuánto peso por día se debe perder como objetivo con diuréticos?",
+                options: ["0.25 kg/día", "0.5 kg/día", "1 kg/día", "2 kg/día"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué se considera ascitis refractaria resistente a diuréticos?",
+                options: ["No responde a 200 mg espironolactona + 80 mg furosemida", "No responde o recurrencia con dosis máxima (400 mg espironolactona + 160 mg furosemida) por al menos 1 semana", "Cualquier falta de respuesta", "Solo si desarrolla insuficiencia renal"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué tipo de hiponatremia es más común en cirróticos con ascitis?",
+                options: ["Hipovolémica", "Hipervolémica dilucional", "Normovolémica", "Por pérdida renal"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántos litros de ascitis se pueden remover en paracentesis evacuadora?",
+                options: ["Máximo 2 litros", "Máximo 3 litros", "Mayor de 5 litros (paracentesis de gran volumen)", "No hay límite"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuánta albúmina se administra por litro removido en paracentesis >5L?",
+                options: ["4 g/L", "6-8 g/L", "10 g/L", "15 g/L"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza a la peritonitis bacteriana espontánea (PBE)?",
+                options: ["Infección secundaria a perforación", "Infección del líquido de ascitis sin origen intraabdominal evidente", "Infección por parásitos", "Infección viral"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la mortalidad de la PBE?",
+                options: ["5%", "10%", "Cercana a 20%", "40%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué valor de PMN en líquido ascítico define PBE?",
+                options: ["≥100 células/mm³", "≥150 células/mm³", "≥250 células/mm³", "≥500 células/mm³"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el antibiótico de elección en PBE?",
+                options: ["Amoxicilina-clavulánico", "Cefotaxima 2g IV c/8-12h o ceftriaxona 2g IV c/24h", "Gentamicina", "Metronidazol"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿En qué porcentaje de casos se resuelve la PBE con tratamiento?",
+                options: ["50%", "65%", "85%", "95%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué se administra junto con cefotaxima para prevenir insuficiencia renal en PBE?",
+                options: ["Solución salina", "Albúmina (1.5 g/kg al diagnóstico y 1 g/kg al tercer día)", "Dextrán", "Manitol"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué profilaxis antibiótica se recomienda tras sobrevivir a PBE?",
+                options: ["Ceftriaxona semanal", "Amoxicilina diaria", "Norfloxacino 400 mg/día hasta que desaparezca ascitis o trasplante", "Ciprofloxacino c/12h"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con proteínas <1 g/dl en ascitis desarrollan PBE?",
+                options: ["5%", "10%", "20%", "40%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el patógeno más común en PBE?",
+                options: ["Staphylococcus aureus", "Escherichia coli y otros Gram negativos", "Streptococcus pneumoniae", "Bacteroides"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "CASO CLÍNICO 1: Paciente con cirrosis. Elastografía: 22 kPa. Plaquetas: 140,000. Según Baveno VI, ¿qué se debe hacer?",
+                options: ["No requiere endoscopia", "Realizar endoscopia de escrutinio (elastografía ≥20 kPa + plaquetas <150,000)", "Solo vigilancia", "TIPS inmediato"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 2: Paciente con hematemesis, hipotensión y cirrosis conocida. FC: 110 lpm, TA: 90/60. ¿Qué fármaco se debe administrar de inmediato?",
+                options: ["Omeprazol", "Terlipresina 2 mg IV c/4h", "Propranolol oral", "Octreótido únicamente"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 3: Paciente post-hemorragia variceal controlada. ¿Qué se recomienda en profilaxis secundaria?",
+                options: ["Solo observación", "Solo betabloqueadores", "Betabloqueadores + ligadura con bandas", "TIPS a todos"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 4: Paciente con GPVH de 8 mm Hg. ¿Tiene riesgo de formar várices?",
+                options: ["No, necesita >10 mm Hg", "Sí, ya tiene hipertensión portal", "Solo si tiene Child-Pugh C", "Solo si tiene ascitis"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 5: Paciente con ascitis moderada. Inicia espironolactona 100mg + furosemida 40mg. No hay mejoría en 1 semana. ¿Qué hacer?",
+                options: ["Paracentesis evacuadora", "Aumentar dosis de forma escalonada (cada 7 días)", "Suspender diuréticos", "TIPS inmediato"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 6: Paciente con ascitis. Paracentesis: líquido transparente, PMN 280/mm³, cultivo pendiente. ¿Diagnóstico?",
+                options: ["Ascitis no complicada", "Peritonitis bacteriana espontánea (PMN ≥250)", "Ascitis quilosa", "Peritonitis secundaria"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 7: Paciente con PBE. Se administra cefotaxima. ¿Qué más se debe dar para prevenir insuficiencia renal?",
+                options: ["Solución salina 0.9%", "Albúmina 1.5 g/kg inicial y 1 g/kg al día 3", "Furosemida", "Dopamina"],
+                correct: 1,
+                time: 30
+            }
+        ];
+
+        // Función para mezclar el array de preguntas (algoritmo Fisher-Yates)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        // Mezclar las preguntas al inicio
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+        let originalOrder = [];
+
+        // Guardar el orden original para mostrar resultados
+        questions.forEach((q, index) => {
+            originalOrder.push({
+                question: q,
+                originalIndex: questionsBank.indexOf(q)
+            });
+        });
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            // Mezclar preguntas nuevamente
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        // Iniciar el quiz
+        displayQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,694 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Crisis Civilizatoria</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Crisis Civilizatoria</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué tipo de crisis está atravesando el modelo civilizatorio de la modernidad occidental capitalista?",
+                options: ["Una crisis temporal", "Una crisis multidimensional que afecta todas las áreas de la vida", "Solo una crisis económica", "Una crisis sin importancia"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la crisis civilizatoria según el documento?",
+                options: ["Crisis temporal del capitalismo", "Crisis de modelo de producción y consumo insostenible, crisis terminal del patrón civilizatorio capitalista", "Solo cambio climático", "Crisis política únicamente"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué amenaza la crisis civilizatoria?",
+                options: ["Solo la economía", "La vida del planeta, ecosistemas y biodiversidad", "Solo la política", "Únicamente a países pobres"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Según Leonardo Boff (2019), ¿cómo se manifiesta la crisis?",
+                options: ["Solo económicamente", "\"El Grito de los Pobres y El Grito de la Tierra\"", "Solo ambientalmente", "Sin manifestaciones claras"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Quién es empobrecido según el documento?",
+                options: ["El que nace pobre", "Quien es discriminado, oprimido, humillado, esclavizado por el modo de producción capitalista", "El que no trabaja", "El que no estudia"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son los TRES grandes fundamentos que sostienen la crisis desde las invasiones europeas?",
+                options: ["Democracia, libertad, igualdad", "Colonialismo, Capitalismo, Positivismo", "Socialismo, comunismo, anarquismo", "Ciencia, tecnología, educación"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué ha hecho la crisis civilizatoria con la tierra, alimentos, servicios y salud?",
+                options: ["Los ha democratizado", "Los ha convertido en mercancías y espacios de acumulación de riqueza", "Los ha distribuido equitativamente", "Los ha eliminado"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la Modernidad según el documento?",
+                options: ["Avance tecnológico", "Proyecto occidental con visión antropocéntrica, patriarcal y eurocéntrica cuya esencia es la colonialidad", "Progreso humano", "Desarrollo científico"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué ha derivado la modernidad junto a su impronta capitalista?",
+                options: ["Prosperidad global", "Un sistema mundo que genera crisis multidimensional llamada \"Crisis Civilizatoria\"", "Igualdad mundial", "Paz universal"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuántas dimensiones tiene la crisis mundial según el documento?",
+                options: ["3 dimensiones", "5 dimensiones", "Múltiples: económica, financiera, ambiental, alimentaria, energética, laboral, social, ética", "Solo 2 dimensiones"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de la riqueza mundial controla el 1% más rico según OXFAM (2019)?",
+                options: ["50%", "82%", "60%", "70%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la raíz de la crisis económica según el documento?",
+                options: ["Falta de tecnología", "Un mundo cada vez más rico, pero donde hay más pobreza y concentración en pocas manos", "Sobrepoblación", "Falta de recursos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué sectores producen mayores ganancias relacionados con salud según OXFAM?",
+                options: ["Hospitales públicos", "Industrias farmacéutica y aseguradora", "ONG de salud", "Clínicas gratuitas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué revela la crisis financiera de 2008 sobre el modelo capitalista?",
+                options: ["Es equitativo", "Cuando hay ganancias se concentran, cuando hay pérdidas los estados y pueblos las asumen", "Funciona bien", "Beneficia a todos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Según Evo Morales (2008), ¿cuánto destinaron EE.UU. y UE para salvar banqueros vs. programas contra hambre y cambio climático?",
+                options: ["Igual cantidad", "4.100 billones para banqueros vs. solo 13 billones (313 veces menos) para hambre/clima", "Más para programas sociales", "No hubo diferencia"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué dice la FAO (2009) sobre la producción mundial de alimentos?",
+                options: ["No hay suficiente comida", "El mundo produce más alimentos que los requeridos pero no están distribuidos equitativamente", "Hay escasez global", "Solo algunos países producen"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuánto más alimentos producen los países de América Latina de los que consumen?",
+                options: ["10% más", "40% más", "No producen suficiente", "20% más"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántas personas en América Latina sufren malnutrición a pesar de la sobreproducción?",
+                options: ["30 millones", "52 millones", "100 millones", "20 millones"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué doble \"epidemia\" enfrentamos según el documento?",
+                options: ["Dos virus diferentes", "Centro capitalista: sobrepeso/obesidad; Mundo periférico: desnutrición/hambre", "Solo obesidad global", "Solo desnutrición global"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de población económicamente activa está en sector informal en América Latina?",
+                options: ["20%", "Más del 50%", "30%", "10%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántas muertes anuales están vinculadas al trabajo según Instituto de Salud y Trabajo de Finlandia (WSH, 2017)?",
+                options: ["1 millón", "2.8 millones", "5 millones", "500 mil"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántos millones de barriles de petróleo se consumen diariamente en el mundo?",
+                options: ["50 millones", "Más de 100 millones", "80 millones", "30 millones"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje del consumo mundial de petróleo corresponde a Estados Unidos?",
+                options: ["10%", "Más del 20%", "50%", "30%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuántos científicos publicaron carta alertando sobre gravedad del cambio climático según BBC News (2019)?",
+                options: ["5,000", "Más de 15,000", "1,000", "10,000"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de glaciares tropicales del mundo están en la región andina?",
+                options: ["50%", "90%", "70%", "30%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué considera Bolsonaro sobre la crisis climática según Becerra (2020)?",
+                options: ["Un problema real", "Un complot marxista", "Una emergencia", "Un fenómeno natural"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué tuiteaba Trump en 2012 sobre la crisis climática?",
+                options: ["Era real", "Era un invento de China", "Había que actuar", "Era urgente"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la \"aceleración global\" según Breilh (2007)?",
+                options: ["Mayor velocidad de transporte", "Proceso que aumenta velocidad de flujos económicos/financieros con rápido crecimiento económico", "Avance tecnológico", "Desarrollo urbano"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué procesos marchan paralelos según el documento?",
+                options: ["Crecimiento y desarrollo", "Aceleración global y despojo", "Tecnología y educación", "Ciencia y progreso"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué destruyen las políticas neoliberales según el documento?",
+                options: ["La tecnología", "La pequeña economía campesina, produciendo para mercado/ganancia en vez de para la vida", "Solo el ambiente", "La industria"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Por qué recurso se dice que serán las guerras del siglo XXI?",
+                options: ["Petróleo", "Agua", "Oro", "Alimentos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la \"desciudadanización\" según Basile (2020)?",
+                options: ["Pérdida de nacionalidad", "Proceso donde sector social mercantiliza vida en privado mientras otro sufre desposesión/exclusión", "Cambio de residencia", "Emigración masiva"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué han pasado a ser los medios de comunicación en últimos 30 años?",
+                options: ["Más democráticos", "Propiedad de grandes corporaciones trasnacionales que manipulan para crear matrices de opinión", "Más independientes", "Públicos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la \"acumulación epidemiológica\"?",
+                options: ["Más enfermedades infecciosas", "Salud amenazada por doble carga: problemas viejos (carencias/infecciones) + nuevos (patrón tecnológico)", "Solo enfermedades crónicas", "Disminución de enfermedades"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué son los \"perfiles híbridos\" según Breilh (2011)?",
+                options: ["Solo enfermedades modernas", "Combinación de enfermedades por producción subalterna/pobreza con las del nuevo patrón tecnológico", "Solo enfermedades genéticas", "Enfermedades mentales"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué efecto tiene el aumento de temperatura sobre el mosquito de la malaria según Heredia (2011)?",
+                options: ["Lo elimina", "Eleva reproducción, aumenta longevidad, disminuye maduración del plasmodium, altera distribución", "No le afecta", "Solo cambia color"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿A cuánto se acorta el periodo de maduración del plasmodium a 25°C vs. 16-20°C?",
+                options: ["De 26 días a 20 días", "De 26 días a 13 días", "Sin cambio", "Se duplica"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje del cáncer tiene origen ambiental o laboral según OMS (2011)?",
+                options: ["20%", "50%", "80%", "30%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de antibióticos consumidos en el mundo van a industria de alimentos (pollo/cerdos)?",
+                options: ["20%", "50%", "70%", "10%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué modelo de pensiones destruyó la solidaridad intergeneracional?",
+                options: ["Modelo público", "Modelo de \"capitalización individual\" que privilegia aportes individuales", "Modelo mixto", "Modelo comunitario"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la epidemiología crítica latinoamericana según el documento?",
+                options: ["Solo estadística", "Usa categorías: determinación social, reproducción social, metabolismo sociedad-naturaleza", "Solo estudia virus", "No existe"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "La epidemiología crítica transforma \"persona, lugar, tiempo\" en:",
+                options: ["Individuo, espacio, momento", "Clase social, territorio social, historia", "Población, ambiente, periodo", "Sujeto, zona, época"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué proponen los pueblos originarios como alternativa? (sumak kawsay / suma qmaña)",
+                options: ["Capitalismo verde", "Buen Vivir / Vivir Bien: vida buena que satisfaga necesidades de todos, equilibrio con naturaleza", "Desarrollo acelerado", "Modernización occidental"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué dice Evo Morales en \"Salvemos al planeta del capitalismo\"?",
+                options: ["El capitalismo es sostenible", "\"El capitalismo está destrozando el planeta, todo se convierte en mercancía, hasta la vida misma\"", "El capitalismo puede reformarse", "No hay alternativa"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la ÚNICA salida a la crisis civilizatoria según el documento?",
+                options: ["Reformar el capitalismo", "Cambio profundo y radical del modelo civilizatorio, construir nueva forma de vivir, relacionarnos, producir y consumir", "Mayor crecimiento económico", "Más tecnología"],
+                correct: 1,
+                time: 30
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

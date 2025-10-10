@@ -1,0 +1,754 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Encefalopatía Hepática</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz: Encefalopatía Hepática</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questions = [
+            {
+                q: "¿Qué es la encefalopatía hepática (EH)?",
+                options: ["Inflamación del hígado por virus", "Acumulación de sustancias neurotóxicas por insuficiencia hepática", "Obstrucción de vías biliares", "Cáncer hepático avanzado"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En cuántos factores se clasifica la EH según el documento?",
+                options: ["2 factores", "3 factores", "4 factores", "5 factores"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué tipos de EH existen según la enfermedad subyacente?",
+                options: ["Solo tipo A", "Tipos A, B o C", "Tipos 1, 2, 3", "Tipos I, II, III, IV"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la encefalopatía hepática mínima (EHM)?",
+                options: ["Deterioro cognitivo severo", "Deterioro cognitivo leve sin alteraciones clínicas evidentes", "Coma hepático", "Confusión aguda"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con cirrosis desarrollan EH clínica a lo largo de su vida?",
+                options: ["10-20%", "20-30%", "30-45%", "Más del 45%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el riesgo anual estimado de desarrollar EH en pacientes con cirrosis?",
+                options: ["5-10%", "10-15%", "De 20%", "30-40%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el PRINCIPAL factor de riesgo para desarrollar EH según el documento?",
+                options: ["Hemorragia digestiva", "Infecciones (abdominales, urinarias, respiratorias)", "Estreñimiento", "Consumo de alcohol"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué porcentaje de pacientes con TIPS se desarrolla EH?",
+                options: ["5-10%", "10-50%", "50-70%", "70-90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con hepatopatía crónica avanzada desarrollan EHM?",
+                options: ["5-15%", "20-80%", "85-95%", "10-20%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la mortalidad aproximada en pacientes hospitalizados con EH?",
+                options: ["5%", "10%", "19%", "30%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el PRINCIPAL sitio de producción de amonio?",
+                options: ["Hígado", "Intestino (genera hasta 80%)", "Riñón", "Músculo"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de amonio genera el intestino?",
+                options: ["50%", "60%", "70%", "80%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la piedra angular para el desarrollo de la EH?",
+                options: ["La bilirrubina", "El amoniaco (NH₃)", "Las transaminasas", "La albúmina"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué sucede cuando el amoniaco atraviesa la barrera hematoencefálica?",
+                options: ["Se elimina por orina", "Produce desamidación de glutamato-amonio formando glutamina", "Se transforma en urea", "Se almacena en grasa"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el segundo lugar de detoxificación de amonio después del hígado?",
+                options: ["Riñón", "Pulmón", "Músculo", "Cerebro"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de la carga amoniacal excreta normalmente el riñón?",
+                options: ["10%", "20%", "30%", "50%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿En situaciones de estrés, hasta qué porcentaje puede excretar el riñón?",
+                options: ["40%", "50%", "60%", "80%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "Según el estudio CANONIC, ¿qué factor demostró correlación con mortalidad en EH?",
+                options: ["La bilirrubina", "La inflamación sistémica", "La albúmina baja", "Las plaquetas bajas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué concepto integra el rol del intestino en la EH?",
+                options: ["Eje hígado-cerebro", "Eje intestino-cerebro", "Eje renal-hepático", "Eje portal-sistémico"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué se basa principalmente el diagnóstico de EH?",
+                options: ["Exámenes de laboratorio", "Datos clínicos", "Biopsia hepática", "Resonancia magnética"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué escala se utiliza para clasificar la gravedad de la EH?",
+                options: ["Escala de Glasgow", "Escala de Child-Pugh", "Criterios de West-Haven", "Escala MELD"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según West-Haven, ¿cuántos grados de EH existen?",
+                options: ["3 grados", "4 grados (Mínima, I, II, III, IV)", "5 grados", "6 grados"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza al grado I de West-Haven?",
+                options: ["Coma", "Alteración mínima de conciencia, euforia o ansiedad", "Somnolencia y estupor", "Solo alteraciones psicométricas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza al grado IV de West-Haven?",
+                options: ["Confusión", "Letargo", "Coma", "Ansiedad"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué signo neurológico es característico del grado II?",
+                options: ["Convulsiones", "Asterixis", "Rigidez", "Temblor fino"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué prueba neuropsicológica tradicional se menciona para EH?",
+                options: ["Mini-Mental", "Test psicométrico para encefalopatía hepática (PHES)", "Test de Montreal", "Escala de Blessed"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuántas subpruebas incluye el PHES?",
+                options: ["3", "4", "5", "6"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué aplicación móvil se basa en la prueba de Stroop?",
+                options: ["HepatApp", "EncephalApp", "LiverTest", "CirrhosisApp"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué ondas se observan en el EEG en pacientes con EH?",
+                options: ["Ondas rápidas de baja amplitud", "Ondas de baja frecuencia, alta amplitud y trifásicas", "Ondas alpha normales", "Ondas beta aumentadas"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué se observa característicamente en la resonancia magnética con EH?",
+                options: ["Hemorragia cerebral", "Intensidad cortical bilateral (fenómeno manganeso)", "Atrofia cerebral difusa", "Tumores cerebrales"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el aporte calórico recomendado en pacientes con EH?",
+                options: ["20-25 kcal/kg/día", "25-30 kcal/kg/día", "35-40 kcal/kg/día", "45-50 kcal/kg/día"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Está justificada la restricción de proteínas en casos crónicos de EH?",
+                options: ["Sí, siempre", "No, solo en brotes agudos", "Sí, en todos los casos", "Solo en Child-Pugh C"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En EH avanzada (grado III-IV), ¿qué medida es prioritaria?",
+                options: ["Dieta estricta", "Manejo avanzado de vía aérea e intubación", "Antibióticos orales", "Restricción de líquidos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el medicamento de primera línea para EH?",
+                options: ["Rifaximina", "Lactulosa", "Neomicina", "Metronidazol"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la dosis inicial de lactulosa vía oral?",
+                options: ["10 ml cada 12 horas", "15 ml cada 8 horas", "25 ml de solución cada 12 horas", "50 ml cada 24 horas"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuántas deposiciones líquidas al día se buscan con lactulosa?",
+                options: ["1", "2-3", "4-5", "Más de 6"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el mecanismo de acción de la lactulosa?",
+                options: ["Antibiótico directo", "Acidificación del colon y efecto catártico", "Quelante de amonio", "Inhibidor enzimático"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Para qué está aprobada la rifaximina por la FDA?",
+                options: ["Tratamiento de EH aguda", "Profilaxis secundaria de EH", "Tratamiento de primera línea", "Solo casos pediátricos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué ventaja tiene la rifaximina?",
+                options: ["Absorción intestinal completa", "Absorción intestinal mínima", "Se elimina por riñón", "No requiere dosis ajustada"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué antibiótico tiene riesgo de ototoxicidad y nefrotoxicidad?",
+                options: ["Rifaximina", "Neomicina", "Lactulosa", "Metronidazol"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la limitación del metronidazol?",
+                options: ["Baja eficacia", "Ototoxicidad, nefrotoxicidad y neurotoxicidad", "Muy costoso", "Difícil administración"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿En qué porcentaje de pacientes con cirrosis existe depleción de zinc?",
+                options: ["50%", "70%", "85%", "96%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Qué puntuación MELD se correlaciona con mayor incidencia de EH y déficit de zinc?",
+                options: ["MELD ≥ 8", "MELD ≥ 10", "MELD ≥ 12", "MELD ≥ 15"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué componente de LOLA estimula la síntesis de glutamina?",
+                options: ["L-aspartato", "L-ornitina", "Ambos", "Ninguno"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la recomendación actual de guías para LOLA?",
+                options: ["Primera línea", "Uso alternativo o adicional", "Contraindicado", "Solo en niños"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué laxante demostró buenos resultados comparado con lactulosa?",
+                options: ["Bisacodilo", "Polietilenglicol 3350 (PEG)", "Lactitol", "Aceite mineral"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué probiótico se menciona que reduce la expresión de Escherichia coli?",
+                options: ["Bifidobacterium", "Lactobacillus", "Saccharomyces", "Streptococcus"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué significa MARS?",
+                options: ["Sistema de recirculación adsorbente molecular", "Manejo avanzado de resección sinusoidal", "Método alternativo de rescate sistémico", "Monitoreo arterial de resistencia sistémica"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "En el estudio RELIEF, ¿qué puntuación MELD tenía la mayoría de pacientes?",
+                options: ["< 10", "10-15", "15-20", "> 20"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la principal limitación del MARS?",
+                options: ["Poca eficacia", "Alto costo", "Muchas complicaciones", "Contraindicaciones frecuentes"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "CASO CLÍNICO 1: Paciente masculino de 55 años con cirrosis alcohólica. Llega con confusión, desorientación en tiempo, cambios de personalidad y asterixis. ¿Qué grado de West-Haven presenta?",
+                options: ["Grado I", "Grado II", "Grado III", "Grado IV"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 2: Paciente con cirrosis que presenta alteraciones solo en pruebas psicométricas, sin evidencia clínica de cambios mentales. ¿Qué tipo de EH tiene?",
+                options: ["EH Grado I", "EH Grado II", "Encefalopatía Hepática Mínima", "EH Grado 0"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 3: Paciente cirrótico ingresa con fiebre, dolor abdominal y confusión. Laboratorio: leucocitos 15,000. ¿Cuál es el principal factor precipitante probable?",
+                options: ["Hemorragia digestiva", "Infección", "Estreñimiento", "Deshidratación"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 4: Paciente con EH grado III que no responde a lactulosa ni rifaximina después de 5 días. ¿Qué se debe considerar?",
+                options: ["Aumentar dosis de lactulosa", "Cambiar a neomicina", "Considerar TIPS o embolización de shunt", "Solo continuar tratamiento"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 5: Paciente post-TIPS desarrolla confusión 2 semanas después. ¿Qué porcentaje de pacientes con TIPS desarrollan EH?",
+                options: ["5-10%", "10-50%", "60-70%", "80-90%"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 6: Paciente con cirrosis y ascitis recibe diuréticos. Desarrolla confusión, Na+ 118 mEq/L. ¿Qué complicación presenta?",
+                options: ["Encefalopatía por hipernatremia", "Encefalopatía por hiponatremia (< 125 mEq/L)", "Insuficiencia renal", "Sepsis"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 7: Paciente con hemorragia digestiva alta y cirrosis. ¿Qué antibiótico profiláctico se debe dar según el documento?",
+                options: ["Amoxicilina", "Ciprofloxacino", "Ceftriaxona 1g IV c/24h o norfloxacino 400mg c/12h", "Metronidazol"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 8: Paciente con EH que mejora con tratamiento. Proteínas en líquido ascítico < 1 g/dl. ¿Qué riesgo tiene?",
+                options: ["Hemorragia", "20% de desarrollar peritonitis bacteriana espontánea", "Insuficiencia renal", "Encefalopatía grave"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 9: Paciente Child-Pugh C con MELD 12. Laboratorio muestra zinc bajo. ¿En qué porcentaje de pacientes con MELD ≥12 hay déficit de zinc?",
+                options: ["50%", "70%", "85%", "96%"],
+                correct: 3,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 10: Paciente con EH recurrente a pesar de lactulosa. Se agrega rifaximina. ¿Qué estudios muestran sobre la combinación?",
+                options: ["No hay diferencia", "Mejores resultados que monoterapia", "Más efectos adversos", "Contraindicada"],
+                correct: 1,
+                time: 30
+            }
+        ];
+
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        // Iniciar el quiz
+        displayQuestion();
+    </script>
+</body>
+</html>

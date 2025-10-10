@@ -1,0 +1,605 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Determinantes de la Salud</title>
+    <h6>te amo</h6>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Determinantes de la Salud</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué es la transición epidemiológica según el documento?",
+                options: ["Cambio en los sistemas de salud únicamente", "Cambios en los patrones de salud y enfermedad en una sociedad", "Aumento de enfermedades infecciosas", "Disminución de la población"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Según el documento, ¿qué paradoja se observa en la transición epidemiológica?",
+                options: ["Mayor mortalidad y menor morbilidad", "Mortalidad descendente junto con morbilidad creciente", "Misma mortalidad y misma morbilidad", "Menor mortalidad solo en niños"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cómo están determinadas la salud y la enfermedad?",
+                options: ["Unicausalmente", "Solo por factores genéticos", "De manera multicausal", "Solo por factores ambientales"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué concepto utiliza el documento para organizar los determinantes?",
+                options: ["Causalidad simple", "Multicausalidad difusa", "Multicausalidad jerárquica", "Determinación aleatoria"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el eslabón final en la cadena de determinación de la salud?",
+                options: ["La sociedad", "El ambiente", "El individuo, en quien se expresan los procesos de enfermedad", "El sistema de salud"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuáles son los dos puentes fundamentales entre población y medio ambiente?",
+                options: ["Tecnología y economía", "Organización social y genoma", "Política y cultura", "Educación y salud"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuántos niveles de determinación de la salud existen?",
+                options: ["3 niveles", "4 niveles", "5 niveles (sistémico, socioestructural, institucional/hogar, doméstico, individual)", "6 niveles"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son las cuatro dimensiones principales de la organización social?",
+                options: ["Salud, educación, vivienda, trabajo", "Estructura económica, instituciones políticas, ciencia y tecnología, cultura e ideología", "Población, ambiente, genoma, sociedad", "Familia, comunidad, Estado, mercado"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son los determinantes estructurales?",
+                options: ["Solo las condiciones de vida", "Nivel de riqueza, estructura ocupacional, estratificación social, mecanismos de redistribución", "Solo el sistema de salud", "Únicamente los estilos de vida"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son los determinantes próximos de la salud?",
+                options: ["Solo las condiciones de trabajo", "Población y ambiente", "Condiciones de trabajo, condiciones de vida, estilos de vida y sistema de salud", "Solo el sistema de salud"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cómo define Last el concepto de RIESGO?",
+                options: ["Probabilidad de enfermarse sin tiempo determinado", "Probabilidad de que ocurra un suceso dentro de un periodo determinado de tiempo o edad", "Solo exposición a factores ambientales", "Condición genética heredable"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué son los \"derechos de intercambio\" según Sen?",
+                options: ["Solo el salario", "Bienes y servicios que puede adquirir una persona a cambio de los recursos que posee", "Únicamente los servicios públicos", "Solo la alimentación"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son los dos tipos de derechos de intercambio?",
+                options: ["Públicos y comunitarios", "Basados en el mercado (privados) y conferidos públicamente (por el Estado)", "Individuales y colectivos", "Nacionales e internacionales"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Por qué la vivienda se representa como puente entre condiciones de vida y ambiente?",
+                options: ["Porque es cara", "Porque constituye el hábitat inmediato del ser humano", "Porque solo protege del frío", "Porque es un derecho"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué factor ha demostrado ser crítico en la salud del niño?",
+                options: ["El ingreso del padre", "La educación de la mujer/madre", "Solo la alimentación", "Solo las vacunas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la distinción fundamental entre condiciones de vida y estilos de vida?",
+                options: ["No hay diferencia", "Condiciones de vida = situación objetiva; Estilos de vida = patrones de conducta", "Solo los estilos importan", "Solo las condiciones importan"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué generan las condiciones de vida?",
+                options: ["Riesgos genéticos", "Riesgos sociales", "Riesgos biológicos únicamente", "Ningún riesgo"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué producen los estilos de vida?",
+                options: ["Riesgos sociales", "Riesgos ambientales", "Riesgos conductuales", "Riesgos genéticos"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué es la SUSCEPTIBILIDAD según el documento?",
+                options: ["Solo la genética", "Fenómeno donde convergen condiciones de trabajo, vida, estilos de vida con estructura y función del cuerpo", "Solo el ambiente", "Solo enfermedades previas"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuántos mecanismos principales están en la transición epidemiológica?",
+                options: ["2 mecanismos", "3: disminución fecundidad, modificación factores riesgo, mejoramiento atención salud", "4 mecanismos", "5 mecanismos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué implica la disminución de la fecundidad en transición demográfica?",
+                options: ["Cambio de fecundidad natural hacia fecundidad controlada por decisiones de las parejas", "Solo menos nacimientos", "Aumento de la mortalidad", "No tiene impacto"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Cómo cambia la estructura por edad con reducción de fecundidad?",
+                options: ["Más jóvenes", "De predominio de edades jóvenes a predominio de adultos", "Se mantiene igual", "Solo aumentan ancianos"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el resultado epidemiológico de la reducción de fecundidad?",
+                options: ["Más enfermedades infecciosas", "Incremento de personas expuestas a enfermedades no transmisibles", "Menos enfermedades", "Solo afecta a niños"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la tasa de INCIDENCIA?",
+                options: ["Número total de casos", "Número de nuevos casos en población y tiempo definidos", "Proporción de muertes", "Solo casos hospitalizados"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué es la tasa de LETALIDAD?",
+                options: ["Número de casos nuevos", "Número total de enfermos", "Proporción de personas con enfermedad que mueren por ella", "Solo muertes totales"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 1: Una comunidad con aumento de diabetes tipo 2. ¿Qué determinantes estructurales analizar?",
+                options: ["Solo la genética", "Nivel de riqueza, estructura ocupacional, estratificación social, redistribución", "Solo el sistema de salud", "Solo la edad"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 2: Familia en hacinamiento sin agua potable. Niño con diarreas frecuentes. ¿Qué determinante próximo afectado?",
+                options: ["Estilos de vida", "Condiciones de vida (vivienda)", "Sistema de salud", "Solo genética"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 3: Trabajador sin protección desarrolla enfermedad respiratoria. ¿Qué determinante?",
+                options: ["Estilos de vida", "Condiciones de trabajo (riesgos ocupacionales)", "Solo mala suerte", "Sistema de salud"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 4: País reduce letalidad de neumonía de 15% a 5% con mejor tratamiento. ¿Qué mecanismo?",
+                options: ["Disminución de fecundidad", "Modificación factores riesgo", "Mejoramiento en organización y tecnología de atención", "Cambio demográfico"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "CASO CLÍNICO 5: Intervención promueve actividad física y dieta saludable. ¿En qué determinante incide?",
+                options: ["Condiciones de trabajo", "Condiciones de vida", "Estilos de vida (promoción de la salud)", "Solo sistema curativo"],
+                correct: 2,
+                time: 30
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>
