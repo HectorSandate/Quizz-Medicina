@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz DILI y Tumores Hepáticos</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Hepatitis por Fármacos y Tumores Hepáticos</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {q:"¿Qué significa DILI?",options:["Daño Inflamatorio del Lóbulo Izquierdo","Daño hepático inducido por fármacos (Drug Induced Liver Injury)","Diagnóstico Infeccioso de Lesión Intestinal","Disfunción Inmune por Lesión"],correct:1,time:20},
+            {q:"¿Cuándo se define daño hepático clínicamente significativo según el DILI Expert Working Group?",options:["ALT mayor a 2 veces el LSN","ALT mayor a 5 veces el LSN","ALT mayor a 10 veces el LSN","Cualquier elevación de ALT"],correct:1,time:30},
+            {q:"¿Qué es la hepatotoxicidad intrínseca o directa?",options:["Impredecible y no dosis dependiente","Dosis dependiente, predecible y reproducible","Solo ocurre en personas susceptibles","Tiene latencia prolongada"],correct:1,time:30},
+            {q:"¿Qué es la hepatotoxicidad idiosincrásica?",options:["Dosis dependiente y predecible","Impredecible, no dosis dependiente, afecta solo a individuos susceptibles","Siempre tiene síntomas de alergia","Ocurre inmediatamente después del consumo"],correct:1,time:30},
+            {q:"¿Cuál es el periodo de latencia típico de la hepatotoxicidad idiosincrásica?",options:["1-3 días","5-90 días","6-12 meses","Más de 2 años"],correct:1,time:30},
+            {q:"¿Qué porcentaje de reacciones adversas generales son hepáticas?",options:["1-5%","4-10%","15-20%","25-30%"],correct:1,time:20},
+            {q:"¿De qué porcentaje de casos de falla hepática fulminante es responsable el DILI en Estados Unidos?",options:["10-20%","25-30%","40-50%","60-70%"],correct:2,time:30},
+            {q:"¿Cuál es la incidencia documentada de DILI en varias series epidemiológicas?",options:["0.5-1 casos por 100,000 habitantes","2.3-23.8 casos por 100,000 habitantes","50-100 casos por 100,000 habitantes","100-200 casos por 100,000 habitantes"],correct:1,time:30},
+            {q:"En países orientales, ¿qué grupo farmacológico ocupa el primer lugar como causante de DILI?",options:["Antibióticos","Antiinflamatorios","Antimicóticos, antituberculosos y hierbas/suplementos","Antihipertensivos"],correct:2,time:30},
+            {q:"¿Qué citocromo cataliza aproximadamente 10% del etanol ingerido?",options:["CYP1A2","CYP2E1","CYP3A4","CYP2D6"],correct:1,time:30},
+            {q:"¿Qué índice R indica lesión hepatocelular?",options:["Menor a 2","Entre 2 y 5","Mayor a 5","Mayor a 10"],correct:2,time:30},
+            {q:"¿Qué índice R indica lesión colestásica?",options:["Mayor a 5","Entre 2 y 5","Menor a 2","Mayor a 10"],correct:2,time:30},
+            {q:"¿Qué índice R indica lesión mixta?",options:["Menor a 2","Mayor a 5","Entre 2 y 5","Mayor a 10"],correct:2,time:30},
+            {q:"¿Qué escala tiene sensibilidad de 86% y especificidad de 89% para determinar causalidad en DILI?",options:["Índice R","RUCAM (CIOMS)","Escala de María y Victorino","Child-Pugh"],correct:1,time:30},
+            {q:"¿Cuál es el tratamiento principal para DILI?",options:["Corticoesteroides","Suspensión del agente causal","N-acetilcisteína","Ácido ursodesoxicólico"],correct:1,time:20},
+            {q:"¿Qué medicamento es el tratamiento de elección para DILI secundario a paracetamol?",options:["Corticoesteroides","Vitamina E","N-acetilcisteína","Silimarina"],correct:2,time:30},
+            {q:"¿Qué es la Ley de Hy?",options:["Una ley sobre prescripción de medicamentos","Criterios que indican mortalidad cercana a 10%","Una escala de gravedad hepática","Un índice de función renal"],correct:1,time:30},
+            {q:"¿Cuántos criterios de la Ley de Hy deben cumplirse para indicar mortalidad cercana a 10%?",options:["1 criterio","2 criterios","3 criterios","4 criterios"],correct:2,time:20},
+            {q:"¿Qué define el DILI crónico?",options:["Persistencia de alteraciones por más de 3 meses","Persistencia de alteraciones por más de 6-12 meses","Cualquier elevación de transaminasas","Desarrollo de cirrosis"],correct:1,time:30},
+            {q:"¿Cuál es la mortalidad por DILI idiosincrásico?",options:["Menos de 0.5%","1-8%","10-15%","20-30%"],correct:1,time:20},
+            {q:"¿Qué porcentaje de las neoplasias malignas del hígado representa el CHC?",options:["50%","70%","90%","95%"],correct:2,time:20},
+            {q:"¿Cuál es la relación hombre:mujer en CHC?",options:["1:1","1.5:1","2 a 2.5:1","3:1"],correct:2,time:20},
+            {q:"En México, ¿cuál es la causa más frecuente de CHC?",options:["Virus de hepatitis B","Virus de hepatitis C","Alcohol (44%)","EHGNA"],correct:2,time:30},
+            {q:"¿Qué porcentaje de pacientes cirróticos desarrollan CHC durante su vida?",options:["10%","Un tercio (33%)","50%","75%"],correct:1,time:30},
+            {q:"¿Qué tamaño mínimo de lesión requiere TC o RM para diagnóstico de CHC?",options:["Menor a 0.5 cm","Al menos 1 cm","Mayor a 2 cm","Mayor a 3 cm"],correct:1,time:30},
+            {q:"¿Qué características típicas confirman CHC en estudios de imagen?",options:["Realce homogéneo en todas las fases","Realce en fase arterial y lavado en fases portal y tardía","Sin realce con contraste","Solo calcificaciones"],correct:1,time:30},
+            {q:"¿Qué sistema de estadificación es el más utilizado para CHC?",options:["TNM","Child-Pugh","BCLC (Barcelona Clinic Liver Cancer)","MELD"],correct:2,time:30},
+            {q:"¿Cuáles son las terapias curativas para CHC?",options:["Solo quimioterapia","Resección quirúrgica, trasplante hepático y ablación por radiofrecuencia","Solo radioterapia","Inmunoterapia exclusivamente"],correct:1,time:30},
+            {q:"¿Cuál es el criterio de Milán para trasplante hepático en CHC?",options:["Cualquier tamaño de tumor","Un tumor ≤ 5 cm o hasta 3 tumores ≤ 3 cm","Hasta 5 tumores de cualquier tamaño","Solo tumores menores a 1 cm"],correct:1,time:30},
+            {q:"¿Cuál es la supervivencia a 4 años si se cumplen los criterios de Milán?",options:["50%","65%","75%","85%"],correct:3,time:30},
+            {q:"¿Qué valor de AFP es contraindicación absoluta para trasplante hepático en CHC?",options:["Mayor a 100 ng/ml","Mayor a 250 ng/ml","Mayor a 500 ng/ml","Mayor a 1,000 ng/ml"],correct:3,time:30},
+            {q:"¿Qué porcentaje de recurrencia de CHC se observa después de resección?",options:["10-20%","30-40%","Hasta 60%","80-90%"],correct:2,time:30},
+            {q:"¿Cuál es el fármaco sistémico de primera línea tradicional para CHC avanzado?",options:["Doxorrubicina","Cisplatino","Sorafenib","Paracetamol"],correct:2,time:20},
+            {q:"¿Qué nueva terapia sistémica es mejor que sorafenib según Finn y colaboradores?",options:["Solo nivolumab","Atezolizumab y bevacizumab","Solo pembrolizumab","Ipilimumab"],correct:1,time:30},
+            {q:"¿Cada cuánto tiempo se recomienda vigilancia con US en pacientes cirróticos?",options:["Cada 3 meses","Cada 6 meses","Cada año","Cada 2 años"],correct:1,time:20},
+            {q:"¿Qué porcentaje de todos los colangiocarcinomas representa el CCI?",options:["5%","10%","25%","50%"],correct:1,time:20},
+            {q:"¿Cuál es la incidencia de CCI por 100,000 personas en países occidentales?",options:["0.5","2.1","5.0","10.0"],correct:1,time:20},
+            {q:"¿Cuál es el patrón histológico más común del CCI?",options:["Infiltrante intraductal","Periductal","Formador de masa","Mixto"],correct:2,time:30},
+            {q:"¿En qué porcentaje de los CCI se realiza diagnóstico de forma incidental?",options:["10%","25%","43%","60%"],correct:2,time:30},
+            {q:"¿Qué porcentaje de obstrucción de vía biliar presentan solo 25% de pacientes con CCI?",options:["Siempre presente","Poco frecuente (solo 25%)","Muy común (75%)","Nunca ocurre"],correct:1,time:30},
+            {q:"¿Qué porcentaje de casos con tumor resecable necesitan hepatectomía mayor?",options:["30%","50%","70%","90%"],correct:2,time:30},
+            {q:"¿Cuál es la tasa de recurrencia después de resección completa de CCI?",options:["10-20%","25-35%","49-64%","70-80%"],correct:2,time:30},
+            {q:"¿Cuándo ocurre la mayoría de las recurrencias de CCI?",options:["Al mes de la cirugía","2-3 años posteriores","5 años después","10 años después"],correct:1,time:30},
+            {q:"¿Qué porcentaje de los tumores hepáticos representa el hepatocarcinoma fibrolamelar (HCC-FL)?",options:["0.25%","0.85-1.6%","5%","10%"],correct:1,time:30},
+            {q:"¿Qué característica histológica distingue al HCC-FL?",options:["Células gigantes","Bandas de colágeno fibroso que rodean las células tumorales","Necrosis extensa","Calcificaciones difusas"],correct:1,time:30},
+            {q:"¿El HCC-FL se presenta con hepatopatía previa?",options:["Siempre","En 50% de los casos","No se caracteriza por presentar hepatopatía previa","Solo en cirróticos"],correct:2,time:30},
+            {q:"¿Cuál es el tumor sólido intraabdominal más frecuente en niños?",options:["Carcinoma hepatocelular","Colangiocarcinoma","Hepatoblastoma","Sarcoma hepático"],correct:2,time:20},
+            {q:"¿En qué porcentaje de pacientes con hepatoblastoma la AFP está elevada?",options:["50%","70%","90%","100%"],correct:2,time:20},
+            {q:"¿Qué porcentaje de tumores hepáticos representan los sarcomas hepáticos primarios?",options:["Menos de 0.5%","Menos de 1%","5%","10%"],correct:1,time:20},
+            {q:"¿Cuántos casos de tumores neuroendocrinos primarios de hígado (TNEPH) se han documentado?",options:["Más de 1,000","Más de 500","Menos de 200","Menos de 50"],correct:2,time:30}
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

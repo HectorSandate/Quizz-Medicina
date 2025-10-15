@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Ascitis, PBE e Hipertensión Portal</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Ascitis, PBE e Hipertensión Portal</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {q:"¿Qué porcentaje de casos de ascitis son secundarios a hipertensión portal por cirrosis hepática?",options:["60%","70%","85%","95%"],correct:2,time:20},
+            {q:"¿Qué valor del gradiente de albúmina suero-ascitis (GASA) es indicativo de hipertensión portal?",options:[">0.5",">1.1",">2.0",">3.0"],correct:1,time:20},
+            {q:"¿Cuál es la hipótesis más aceptada para explicar la fisiopatogenia de la ascitis?",options:["Hipótesis de la inflamación crónica","Hipótesis de la vasodilatación arterial","Hipótesis de la vasoconstricción portal","Hipótesis de la disfunción renal"],correct:1,time:30},
+            {q:"¿Qué sustancia es el principal mediador de la vasodilatación arterial esplácnica en la cirrosis?",options:["Endotelina","Angiotensina II","Óxido nítrico (NO)","Vasopresina"],correct:2,time:30},
+            {q:"¿Qué cantidad aproximada de líquido ascítico es necesaria para detectar ascitis en la exploración física?",options:["100-500 mL","1-1.5 L","2-3 L","4-5 L"],correct:1,time:30},
+            {q:"¿Cuál es el estándar de referencia para la detección de ascitis?",options:["Exploración física","Radiografía simple","Ultrasonido","Tomografía computada"],correct:2,time:20},
+            {q:"¿Cuál es la única contraindicación absoluta para realizar paracentesis?",options:["Trombocitopenia","Coagulación intravascular diseminada","INR prolongado","Obesidad mórbida"],correct:1,time:30},
+            {q:"En la clasificación de ascitis por volumen, ¿cuál es el volumen de la ascitis Grado III?",options:["100 mL","1000 mL",">1000 mL","500 mL"],correct:2,time:20},
+            {q:"¿Cuál es la restricción de sodio recomendada en el tratamiento de la ascitis?",options:["<1 g/día","<2 g/día","<3 g/día","<4 g/día"],correct:1,time:30},
+            {q:"¿Cuál es la dosis inicial recomendada de espironolactona en el tratamiento de ascitis?",options:["50 mg/día","100 mg/día","200 mg/día","400 mg/día"],correct:1,time:20},
+            {q:"¿Cuál es la relación de dosis recomendada entre espironolactona y furosemida?",options:["50:40","100:40","200:80","400:160"],correct:1,time:30},
+            {q:"¿Cuál es la velocidad recomendada de pérdida de peso diaria en pacientes SIN edema periférico?",options:["100-300 mL/día","300-500 mL/día","500-1000 mL/día","1000-1500 mL/día"],correct:1,time:30},
+            {q:"¿Qué valor de excreción urinaria de sodio en 24 horas indica sensibilidad a diuréticos?",options:[">50 mEq",">78 mEq",">100 mEq",">120 mEq"],correct:1,time:30},
+            {q:"En paracentesis evacuadora, ¿cuál es la dosis estándar de albúmina por litro de ascitis removida?",options:["2-4 g/L","4-6 g/L","6-8 g/L","8-10 g/L"],correct:2,time:30},
+            {q:"¿Qué porcentaje de pacientes con ascitis responden a terapia combinada con diuréticos?",options:["60%","70%","80%","90%"],correct:3,time:20},
+            {q:"¿Qué recuento de polimorfonucleares en líquido ascítico define el diagnóstico de PBE?",options:[">100 células/mm³",">250 células/mm³",">500 células/mm³",">1000 células/mm³"],correct:1,time:20},
+            {q:"¿Qué porcentaje de pacientes cirróticos con ascitis pueden desarrollar PBE?",options:["10%","20%","30%","40%"],correct:2,time:20},
+            {q:"¿Cuál es el mecanismo fisiopatológico principal de la PBE?",options:["Infección hematógena","Perforación intestinal","Translocación bacteriana","Contaminación iatrogénica"],correct:2,time:30},
+            {q:"¿Qué porcentaje de pacientes con PBE pueden presentarse asintomáticos?",options:["5%","13%","25%","35%"],correct:1,time:30},
+            {q:"¿Cuál es el antibiótico de elección para el tratamiento de PBE?",options:["Ciprofloxacino","Cefotaxima","Ampicilina","Metronidazol"],correct:1,time:20},
+            {q:"¿Cuál es la dosis de cefotaxima para tratamiento de PBE?",options:["1 g IV cada 12 hrs","2 g IV cada 8 hrs","1 g IV cada 8 hrs","2 g IV cada 12 hrs"],correct:1,time:30},
+            {q:"¿Cuál es la duración recomendada del tratamiento antibiótico en PBE?",options:["3 días","5 días","7 días","10 días"],correct:1,time:20},
+            {q:"¿Cuándo se debe administrar albúmina en pacientes con PBE?",options:["Siempre","Creatinina sérica >1 mg/dL","BUN >20 mg/dL","Todas las anteriores"],correct:3,time:30},
+            {q:"¿Cuál es la dosis de albúmina el primer día en PBE?",options:["1 g/kg","1.5 g/kg","2 g/kg","2.5 g/kg"],correct:1,time:20},
+            {q:"¿Cuándo se debe realizar paracentesis de control después de iniciar antibióticos?",options:["A las 24 horas","A las 48 horas","A las 72 horas","A los 5 días"],correct:1,time:30},
+            {q:"¿Cuál es la dosis de norfloxacino para profilaxis secundaria de PBE?",options:["200 mg/día","400 mg/día","600 mg/día","800 mg/día"],correct:1,time:20},
+            {q:"¿Qué porcentaje de casos de PBE son causados por bacilos Gram negativos?",options:["40%","50%","63%","75%"],correct:2,time:30},
+            {q:"¿Qué valor de GPVH define hipertensión portal?",options:[">3 mmHg",">5 mmHg",">8 mmHg",">12 mmHg"],correct:1,time:20},
+            {q:"¿Qué valor de GPVH se asocia con hemorragia variceal?",options:[">8 mmHg",">10 mmHg",">12 mmHg",">15 mmHg"],correct:2,time:20},
+            {q:"¿Qué porcentaje de sangre hepática proviene de la vena porta?",options:["50%","60%","75%","85%"],correct:2,time:20},
+            {q:"¿Cuál es el beta bloqueador NO selectivo de elección para profilaxis primaria?",options:["Metoprolol","Atenolol","Propranolol","Bisoprolol"],correct:2,time:20},
+            {q:"¿Cuál es la dosis inicial de propranolol para profilaxis primaria?",options:["10 mg cada 12 hrs","20 mg cada 12 hrs","40 mg cada 12 hrs","60 mg cada 12 hrs"],correct:1,time:30},
+            {q:"¿Qué meta de frecuencia cardíaca se busca con beta bloqueadores?",options:["45-50 latidos/min","55-60 latidos/min","65-70 latidos/min","75-80 latidos/min"],correct:1,time:30},
+            {q:"¿Qué reducción del GPVH se considera respuesta hemodinámica adecuada?",options:["10% del basal o <10 mmHg","20% del basal o <12 mmHg","30% del basal o <15 mmHg","40% del basal o <20 mmHg"],correct:1,time:30},
+            {q:"¿Cuál es el tratamiento de elección para profilaxis secundaria?",options:["Solo beta bloqueador","Solo ligadura endoscópica","Beta bloqueador + ligadura endoscópica","TIPS"],correct:2,time:30},
+            {q:"En sangrado agudo variceal, ¿cuál es la dosis de terlipresina las primeras 48 horas?",options:["1 mg cada 4 hrs","2 mg cada 4 hrs","1 mg cada 6 hrs","2 mg cada 6 hrs"],correct:1,time:30},
+            {q:"¿Cuál es la meta de hemoglobina en transfusión restrictiva para sangrado variceal?",options:["6-7 g/dL","7-8 g/dL","8-9 g/dL","9-10 g/dL"],correct:1,time:30},
+            {q:"¿Qué antibiótico se recomienda como profilaxis en sangrado agudo variceal?",options:["Amoxicilina","Ceftriaxona o norfloxacino","Metronidazol","Azitromicina"],correct:1,time:30},
+            {q:"¿Cuándo se debe realizar endoscopia en sangrado variceal agudo?",options:["Primeras 6 horas","Primeras 12 horas","Primeras 24 horas","Primeras 48 horas"],correct:1,time:30},
+            {q:"¿Cuál es el riesgo de sangrado a 2 años en várices grandes sin tratamiento?",options:["10%","20%","30%","40%"],correct:2,time:30},
+            {q:"¿Qué medicamento es de elección para el tratamiento del absceso hepático amebiano?",options:["Ciprofloxacino","Metronidazol","Ceftriaxona","Ampicilina"],correct:1,time:20},
+            {q:"¿Cuál es la dosis oral de metronidazol para absceso hepático amebiano en adultos?",options:["500 mg cada 12 hrs","750 mg cada 12 hrs","1 g cada 12 hrs","1 g cada 8 hrs"],correct:2,time:30},
+            {q:"¿Cuál es la duración del tratamiento con metronidazol para absceso hepático amebiano?",options:["5 días","7 días","10-15 días","21 días"],correct:2,time:20},
+            {q:"¿Qué porcentaje de abscesos hepáticos son solitarios?",options:["40%","50%","60%","70%"],correct:2,time:20},
+            {q:"¿En qué lóbulo hepático se localizan principalmente los abscesos?",options:["Lóbulo izquierdo","Lóbulo derecho","Ambos por igual","Lóbulo caudado"],correct:1,time:20}
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>
