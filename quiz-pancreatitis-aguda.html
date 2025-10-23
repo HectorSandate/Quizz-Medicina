@@ -1,0 +1,444 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Pancreatitis Aguda</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        .back-button {
+            background: #e0e0e0;
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+        }
+
+        .back-button:hover {
+            background: #d0d0d0;
+            transform: translateX(-5px);
+        }
+
+        h1 {
+            color: #667eea;
+            text-align: center;
+            margin-bottom: 30px;
+            font-size: 2em;
+        }
+
+        .progress-bar {
+            width: 100%;
+            height: 10px;
+            background: #e0e0e0;
+            border-radius: 10px;
+            margin-bottom: 30px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #667eea, #764ba2);
+            transition: width 0.3s ease;
+        }
+
+        .question-container {
+            margin-bottom: 30px;
+        }
+
+        .question-number {
+            color: #667eea;
+            font-weight: bold;
+            margin-bottom: 15px;
+            font-size: 1.1em;
+        }
+
+        .question-text {
+            font-size: 1.2em;
+            margin-bottom: 25px;
+            color: #333;
+            line-height: 1.6;
+        }
+
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option {
+            padding: 15px 20px;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            background: white;
+        }
+
+        .option:hover {
+            border-color: #667eea;
+            background: #f5f7ff;
+            transform: translateX(5px);
+        }
+
+        .option.selected {
+            border-color: #667eea;
+            background: #667eea;
+            color: white;
+        }
+
+        .timer {
+            text-align: center;
+            font-size: 1.5em;
+            color: #764ba2;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+
+        .controls {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+
+        button {
+            padding: 12px 30px;
+            border: none;
+            border-radius: 10px;
+            font-size: 1em;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: bold;
+        }
+
+        .btn-next {
+            background: #667eea;
+            color: white;
+        }
+
+        .btn-next:hover {
+            background: #5568d3;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-prev {
+            background: #e0e0e0;
+            color: #333;
+        }
+
+        .btn-prev:hover {
+            background: #d0d0d0;
+        }
+
+        .btn-submit {
+            background: #764ba2;
+            color: white;
+            width: 100%;
+        }
+
+        .btn-submit:hover {
+            background: #653a8e;
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(118, 75, 162, 0.4);
+        }
+
+        .results {
+            display: none;
+        }
+
+        .results.active {
+            display: block;
+        }
+
+        .score {
+            text-align: center;
+            font-size: 2.5em;
+            color: #667eea;
+            margin-bottom: 30px;
+            font-weight: bold;
+        }
+
+        .result-item {
+            margin-bottom: 20px;
+            padding: 20px;
+            border-radius: 10px;
+            border-left: 5px solid;
+        }
+
+        .result-item.correct {
+            background: #e8f5e9;
+            border-color: #4caf50;
+        }
+
+        .result-item.incorrect {
+            background: #ffebee;
+            border-color: #f44336;
+        }
+
+        .result-question {
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #333;
+        }
+
+        .result-answer {
+            margin: 5px 0;
+        }
+
+        .your-answer {
+            color: #f44336;
+        }
+
+        .correct-answer {
+            color: #4caf50;
+        }
+
+        .btn-restart {
+            background: #667eea;
+            color: white;
+            width: 100%;
+            margin-top: 20px;
+        }
+
+        .btn-restart:hover {
+            background: #5568d3;
+        }
+
+        @media (max-width: 600px) {
+            .container {
+                padding: 20px;
+            }
+            h1 {
+                font-size: 1.5em;
+            }
+            .question-text {
+                font-size: 1em;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        
+        <h1>Quiz: Pancreatitis Aguda</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar">
+                <div class="progress-fill" id="progressBar"></div>
+            </div>
+            
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {q:"De acuerdo a los criterios de Atlanta menciona a que clasificación (leve, moderada o grave) corresponde la PA siguiente: Presenta alguna complicación local (necrosis, pseudoquiste), sistémica o bien una o múltiples fallas orgánicas que duran menos de 48 horas (falla orgánica transitoria)",options:["leve","moderadamente grave","grave"],correct:1,time:30},
+            {q:"Etapa de la Evolución de la PA que ocurre durante las primeras dos semanas de iniciado el cuadro, se caracteriza por eventos inflamatorios y antiinflamatorios de intensidad variable.",options:["temprana","tardía","intermedia"],correct:0,time:20},
+            {q:"Principal causa de PA, explica el 40% de los casos",options:["hipercalcemia","neoplasias","etiología biliar"],correct:2,time:20},
+            {q:"Segunda causa de PA que ocasiona hasta el 30% de los eventos",options:["hereditaria o genética","de origen alcohólico","etiología biliar"],correct:1,time:20},
+            {q:"¿Sobre qué valor de triglicéridos se favorece el desarrollo de PA?",options:["150 mg/dl",">1000 mg/dl","250 mg/dl"],correct:1,time:20},
+            {q:"Enzima con mayor especificidad que se eleva en la PA.",options:["lipasa","amilasa","ALT"],correct:0,time:20},
+            {q:"Presentación clínica más frecuente de la PA",options:["Cursa con dolor epigástrico posprandial sobre todo en pacientes con bajo umbral de tolerancia.","Comienza alrededor del ombligo y luego se desplaza hacia la parte inferior derecha del abdomen, volviéndose más agudo e intenso con el tiempo.","Inicio súbito, persistente, intenso, transflictivo y localizado en el epigastrio"],correct:2,time:30},
+            {q:"El punto de corte de la elevación de amilasa y lipasa en la PA se establece a partir de:",options:["4 veces arriba el LSN","2 veces arriba el LSN","3 veces arriba el LSN"],correct:2,time:30},
+            {q:"El uso de antibióticos a manera de profilácticos y descontaminación intestinal están contraindicados:",options:["Verdadero","Falso"],correct:0,time:20},
+            {q:"Escala para la evaluación clínica de la gravedad de la pancreatitis en la cama del paciente, y es de las más utilizadas por su facilidad de obtención",options:["BISAP","CAGE","ATLANTA"],correct:0,time:20},
+            {q:"Índice de gravedad por tomografía que determinan el grado y extensión del proceso pancreático",options:["criterios de Atlanta","criterios de Balthazar","clasificación de TIGAR-O"],correct:1,time:20},
+            {q:"Factor pronóstico de la PA que con un valor de 150 mg/dl a las 72 hr de iniciado el cuadro de la PA predice el desarrollo de necrosis pancreática",options:["procalcitonina","amilasa","proteína C reactiva"],correct:2,time:30},
+            {q:"Solución cristaloide recomendada para resucitación hídrica endovenosa inicial en la PA",options:["Ringer lactato","glucosada 10%","salina al 0.9%"],correct:0,time:20},
+            {q:"¿La nutrición enteral se asocia a un mayor número de complicaciones, razón por la que se considera como terapia de segunda línea para el aporte de calorías suplementarias?",options:["Verdadero","Falso"],correct:1,time:20},
+            {q:"¿En qué tiempo está indicado realizar el reemplazo hídrico por vía intravenosa?",options:["primeras 2 horas","durante las primeras 12 a 24 horas","durante la primera hora"],correct:1,time:30},
+            {q:"Vía preferida para el apoyo nutricional en la PA.",options:["nutrición enteral total (NET)","nutrición parenteral total"],correct:0,time:20},
+            {q:"¿En qué etapa de evolución de la PA suelen ocurrir las complicaciones infecciosas?",options:["etapa temprana","etapa intermedia","etapa tardía"],correct:2,time:20},
+            {q:"Menciona complicaciones locales en la PA (todas son correctas)",options:["Colecciones líquidas, pseudoquiste y necrosis","Obstrucción del tracto de salida gástrico","Trombosis de la vena esplénica o porta","Necrosis colónica"],correct:0,time:30},
+            {q:"Son homogéneas y carecen de una pared definida, la mayoría son y permanecen estériles, se resuelven o desaparecen de manera espontánea y cuando persisten durante más de tres o 4 semanas evolucionan a pseudoquiste",options:["colecciones necróticas agudas","colecciones líquidas agudas","necrosis organizada o encapsulada"],correct:1,time:30},
+            {q:"La persistencia o recurrencia del dolor abdominal, el incremento tardío de las enzimas pancreáticas en suero, el aumento o deterioro de fallas orgánicas y desarrollo de sepsis alertan sobre complicaciones locales y constituyen una indicación de estudios de imagen",options:["Verdadero","Falso"],correct:0,time:30}
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) {
+                        nextQuestion();
+                    }
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>
