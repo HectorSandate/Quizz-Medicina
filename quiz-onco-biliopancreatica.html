@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Neoplasias Biliopancreáticas</title>
+    <style>
+        /* ... (Copia los estilos CSS aquí) ... */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz: Neoplasias Biliopancreáticas</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué subtipo de colangiocarcinoma (CCA) es el más frecuente?",
+                options: ["Intrahepático", "Extrahepático proximal hiliar/perihiliar (Klatskin)", "Extrahepático distal", "Vesicular"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué marcador tumoral es el más utilizado para CCA y qué valor sugiere irresecabilidad?",
+                options: ["AFP > 400", "CA 125 > 100", "CA 19-9 > 1000 UI/ml", "ACE > 10"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "El tumor de Klatskin corresponde a:",
+                options: ["CCA Intrahepático", "CCA Perihiliar (infiltrante en la bifurcación)", "Cáncer de vesícula", "Ampuloma"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el método de imagen de elección para estadificar el CCA?",
+                options: ["Ultrasonido", "Tomografía simple", "Colangiorresonancia (RM)", "CPRE"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el principal factor de riesgo para cáncer de vesícula biliar (CVB)?",
+                options: ["Alcohol", "Litiasis vesicular crónica (especialmente litos grandes)", "Hepatitis B", "Diabetes"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la neoplasia maligna más frecuente de la vía biliar?",
+                options: ["Colangiocarcinoma intrahepático", "Cáncer de vesícula biliar", "Ampuloma", "Hepatocarcinoma"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué variante histológica es la más común en el cáncer de páncreas (CP)?",
+                options: ["Neuroendocrino", "Cistadenocarcinoma", "Adenocarcinoma ductal", "Linfoma"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿En qué localización del páncreas es más frecuente el adenocarcinoma?",
+                options: ["Cabeza", "Cuerpo", "Cola", "Proceso uncinado"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el principal factor de riesgo ambiental para cáncer de páncreas?",
+                options: ["Alcohol", "Café", "Tabaquismo", "Dieta rica en grasas"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué mutación de oncogén está presente en >90% de los cánceres de páncreas?",
+                options: ["BRCA2", "KRAS2", "p53", "SMAD4"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Según los criterios de la NCCN, ¿qué define a un tumor pancreático como 'resecable'?",
+                options: ["Invasión de vena porta >180°", "Contacto con arteria mesentérica superior", "Ausencia de contacto con vasos mayores y planos grasos preservados", "Metástasis a distancia"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el tratamiento quirúrgico estándar para tumores de cabeza de páncreas?",
+                options: ["Pancreatectomía distal", "Pancreatoduodenectomía (Whipple)", "Enucleación", "Pancreatectomía total"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué fármacos se usan en la quimioterapia adyuvante preferida para CP?",
+                options: ["Cisplatino solo", "Gemcitabina + Capecitabina o FOLFIRINOX", "Doxorrubicina", "Metotrexato"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué limitante tiene el marcador CA 19-9?",
+                options: ["Requiere presencia de antígeno Lewis (ausente en 5-10% de población)", "Es demasiado sensible", "Se eleva en embarazo", "No se eleva en cáncer avanzado"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con CP son candidatos a resección al momento del diagnóstico?",
+                options: ["50%", "40%", "15-20%", "5%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué es el signo de Courvoisier?",
+                options: ["Dolor a la inspiración profunda", "Vesícula palpable no dolorosa con ictericia", "Equimosis periumbilical", "Masa pulsátil abdominal"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el pronóstico de sobrevida a 5 años del cáncer de vesícula biliar?",
+                options: ["90%", "50%", "Muy baja (<10-20% global)", "75%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En tumores de la ampolla de Vater, ¿qué tratamiento se prefiere si hay malignidad invasora?",
+                options: ["Ampulectomía endoscópica", "Pancreatoduodenectomía (Whipple)", "Stent biliar", "Radioterapia sola"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué condición genética aumenta significativamente el riesgo de cáncer ampular?",
+                options: ["Síndrome de Lynch", "Poliposis Adenomatosa Familiar (PAF)", "Hemocromatosis", "Fibrosis quística"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué estudio de imagen se prefiere para estadificar CP y ver invasión vascular?",
+                options: ["Ultrasonido abdominal", "Tomografía computarizada trifásica (protocolo páncreas)", "Radiografía simple", "Gammagrafía"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué significa 'resecabilidad limítrofe' (borderline) en CP?",
+                options: ["Tumor < 1 cm", "Invasión vascular que permite reconstrucción venosa segura", "Invasión aórtica", "Metástasis hepáticas únicas"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Para el cáncer de cuerpo y cola de páncreas, ¿cuál es la cirugía indicada?",
+                options: ["Whipple", "Pancreatectomía distal con esplenectomía", "Colecistectomía", "Derivación biliodigestiva"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la mortalidad asociada al cáncer de páncreas?",
+                options: ["Baja", "Moderada", "Es la 3ra neoplasia más letal con peor sobrevida", "Alta pero curable en 80%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En colangiocarcinoma hiliar (Klatskin), ¿qué contraindica la resección?",
+                options: ["Ictericia", "Edad >60", "Afectación bilateral extensa o atrofia lobar con invasión vascular contralateral", "Dolor"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Qué ventaja tiene el Ultrasonido Endoscópico (USE) en CP?",
+                options: ["Es terapéutico", "Detecta tumores <2cm y permite biopsia (BAAF)", "Es más barato que el USG normal", "No requiere sedación"],
+                correct: 1,
+                time: 20
+            }
+        ];
+
+        // (Código JS estándar)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

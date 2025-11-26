@@ -1,0 +1,355 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Pancreatitis Aguda y Crónica</title>
+    <style>
+        /* ... (Copia los estilos CSS aquí) ... */
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; font-weight: bold; transition: all 0.3s ease; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Quiz: Pancreatitis Aguda y Crónica</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Cuáles son los criterios diagnósticos de Pancreatitis Aguda (PA)? Se requieren 2 de 3.",
+                options: ["Dolor abdominal típico, elevación de enzimas >2x, leucocitosis", "Dolor abdominal típico, elevación de enzimas >3x, imagen compatible", "Dolor abdominal, fiebre, ictericia", "Elevación de amilasa, hipocalcemia, imagen en TAC"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Según la clasificación de Atlanta revisada, ¿cómo se define la PA Grave?",
+                options: ["Falla orgánica transitoria (<48 h)", "Falla orgánica persistente (>48 h)", "Presencia de necrosis estéril", "Necesidad de cirugía"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la principal etiología de la Pancreatitis Aguda?",
+                options: ["Alcohólica", "Biliar (40%)", "Hipertrigliceridemia", "Medicamentos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿A partir de qué nivel de triglicéridos aumenta significativamente el riesgo de PA?",
+                options: [">150 mg/dl", ">500 mg/dl", ">1,000 mg/dl", ">5,000 mg/dl"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la solución intravenosa recomendada para la resucitación inicial en PA?",
+                options: ["Solución Salina 0.9%", "Ringer Lactato (o Hartmann)", "Solución Glucosada", "Coloides/Almidones"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuándo está indicada la TC contrastada en PA?",
+                options: ["Al ingreso en todos los pacientes", "A las 24 horas", "Entre 72 a 96 horas si no hay mejoría o duda diagnóstica", "Solo al alta"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la recomendación sobre el uso de antibióticos profilácticos en PA?",
+                options: ["Siempre indicados", "Solo en PA grave", "Contraindicados (no se usan profilácticos)", "Solo si hay necrosis estéril"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En PA Grave, ¿cuál es la vía preferida para el apoyo nutricio?",
+                options: ["Nutrición Parenteral Total (NPT)", "Nutrición Enteral (NET) por sonda nasoyeyunal", "Ayuno absoluto por 10 días", "Dieta líquida oral inmediata"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué puntaje en la escala BISAP predice mortalidad?",
+                options: ["≥ 1 punto", "≥ 2 puntos", "≥ 3 puntos", "≥ 5 puntos"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza a la Pancreatitis Crónica (PC)?",
+                options: ["Restitución completa del parénquima", "Síndrome fibroinflamatorio con daño funcional y estructural irreversible", "Infección bacteriana recurrente", "Elevación persistente de amilasa >3x"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la causa más común de Pancreatitis Crónica a nivel mundial?",
+                options: ["Biliar", "Consumo crónico de alcohol", "Autoinmune", "Hereditaria"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué célula es responsable de la fibrogénesis en la PC?",
+                options: ["Célula acinar", "Célula de los islotes", "Célula estelar del páncreas", "Célula ductal"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la tríada clínica clásica de la Pancreatitis Crónica avanzada?",
+                options: ["Fiebre, ictericia, dolor", "Dolor abdominal, insuficiencia exocrina (esteatorrea), diabetes", "Dolor, vómito, distensión", "Pérdida de peso, anorexia, masa palpable"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué prueba de función exocrina está disponible en México para PC?",
+                options: ["Estimulación con secretina", "Elastasa-1 en heces", "Grasa fecal de 72h", "Prueba de aliento con C13"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué valor de elastasa-1 fecal indica insuficiencia pancreática?",
+                options: ["< 100 µg/g", "> 200 µg/g", "> 500 µg/g", "Cualquier valor positivo"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el umbral de consumo de alcohol diario asociado a PC?",
+                options: ["20 g/día", "40 g/día", "60 g/día", "No existe umbral"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué riesgo confiere fumar >35 paquetes/año para daño pancreático?",
+                options: ["Riesgo Relativo 1.0", "Riesgo Relativo 2.5", "Riesgo Relativo 4.45", "No hay asociación"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza a la Diabetes Tipo 3c?",
+                options: ["Autoinmune (anticuerpos positivos)", "Resistencia a la insulina y obesidad", "Secundaria a enfermedad pancreática, sin síndrome metabólico, IMC bajo", "Gestacional"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "En la clasificación TIGAR-O, ¿qué significa la 'O'?",
+                options: ["Obstructiva", "Ocasional", "Oculta", "Oxidativa"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Cuándo está indicada la cirugía en Pancreatitis Crónica?",
+                options: ["Al diagnóstico", "Dolor intratable o complicaciones (obstrucción, dilatación ductal)", "Siempre que hay esteatorrea", "Para prevenir diabetes"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En PA biliar leve, ¿cuándo se debe realizar la colecistectomía?",
+                options: ["A las 6 semanas", "Al mes", "Durante la misma admisión (antes del egreso)", "No es necesaria"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Para el manejo del dolor en PC, ¿cuál es la estrategia recomendada?",
+                options: ["Iniciar con opioides potentes", "Escalonada (OMS): analgésicos simples -> AINES -> Opioides", "Bloqueo del plexo celiaco de inicio", "Cirugía inmediata"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué hallazgo en TAC sugiere Pancreatitis Autoinmune Tipo 1?",
+                options: ["Páncreas atrófico", "Calcificaciones difusas", "Crecimiento difuso 'en salchicha' con halo hipodenso", "Quistes múltiples"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el tratamiento estándar para la insuficiencia exocrina?",
+                options: ["Insulina", "Enzimas pancreáticas (40-50k unidades lipasa/comida)", "Antibióticos", "Procinéticos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de necrosis pancreática (Balthazar) se asocia a >90% de morbilidad?",
+                options: ["<30%", "30-50%", ">50%", "Ninguno"],
+                correct: 2,
+                time: 20
+            }
+        ];
+
+        // (Código JS estándar para manejar el quiz)
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() {
+            document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`;
+        }
+
+        function updateProgress() {
+            const progress = ((currentQuestion + 1) / questions.length) * 100;
+            document.getElementById('progressBar').style.width = progress + '%';
+        }
+
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+
+        function nextQuestion() {
+            if (currentQuestion < questions.length - 1) {
+                currentQuestion++;
+                displayQuestion();
+            }
+        }
+
+        function prevQuestion() {
+            if (currentQuestion > 0) {
+                currentQuestion--;
+                displayQuestion();
+            }
+        }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+
+                resultHTML += `
+                    <div class="result-item ${resultClass}">
+                        <div class="result-question">Pregunta ${index + 1}: ${question.q}</div>
+                        <div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div>
+                        <div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div>
+                    </div>
+                `;
+            });
+
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `
+                Tu puntuación: ${correctCount}/${questions.length}<br>
+                <span style="font-size: 0.6em;">${percentage}% de aciertos</span>
+            `;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>
