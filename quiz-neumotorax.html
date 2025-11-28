@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quiz Derrame Pleural SEPAR</title>
+    <title>Quiz Neumotórax</title>
     <style>
         * { margin: 0; padding: 0; box-sizing: border-box; }
         body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
@@ -41,8 +41,8 @@
 <body>
     <div class="container">
         <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
-        <h3>A veces me sacas canas pero Te amo</h3>
-        <h1>Quiz: Derrame Pleural (SEPAR)</h1>
+        <h3>Te amo mucho aunque me saques una que otra cana ❤️</h3>
+        <h1>Quiz: Neumotórax</h1>
         
         <div id="quizSection">
             <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
@@ -70,122 +70,122 @@
     <script>
         const questionsBank = [
             {
-                q: "¿Cuál es la causa más frecuente de trasudado pleural?",
-                options: ["Cirrosis hepática", "Insuficiencia cardíaca congestiva", "Síndrome nefrótico", "Tromboembolia pulmonar"],
+                q: "¿Cuál es la causa más común del Neumotórax Espontáneo Primario (NEP)?",
+                options: ["Rotura esofágica", "Heridas penetrantes", "Rotura de 'blebs' subpleurales (< 2 cm)", "Rotura de bullas grandes por enfisema"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿En qué grupo poblacional es más frecuente el Neumotórax Espontáneo Primario?",
+                options: ["Mujeres mayores de 60 años", "Varones, jóvenes, altos y fumadores", "Pacientes con EPOC avanzada", "Niños menores de 10 años"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "Según los criterios de Light, ¿cuál de los siguientes define un exudado?",
-                options: ["Relación proteínas LP/suero > 0.5", "Relación LDH LP/suero < 0.6", "Glucosa en LP > 60 mg/dl", "Colesterol en LP < 45 mg/dl"],
+                q: "¿Cuál es la probabilidad de un tercer episodio de neumotórax si ya se ha tenido una recidiva?",
+                options: ["10%", "25%", "50%", "90%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué es el Neumotórax Espontáneo Secundario (NES)?",
+                options: ["Aquel que ocurre como complicación de una enfermedad pulmonar de base (como EPOC)", "El causado por traumatismo cerrado", "El que aparece tras una broncoscopia", "El que ocurre en personas sanas"],
                 correct: 0,
                 time: 20
             },
             {
-                q: "¿Qué parámetro bioquímico identifica mejor al derrame paraneumónico infectado que requiere drenaje?",
-                options: ["Glucosa < 60 mg/dl", "pH menor de 7.20", "LDH > 500 U/l", "Proteínas > 3 g/dl"],
-                correct: 1,
-                time: 20
-            },
-            {
-                q: "En el derrame pleural tuberculoso en pacientes menores de 35 años, ¿qué combinación sugiere el diagnóstico con alta probabilidad?",
-                options: ["ADA bajo y predominio de polimorfonucleares", "ADA elevado y cociente linfocitos/neutrófilos > 0.75", "Interferón gamma bajo", "Ausencia de linfocitos"],
+                q: "¿Cuál es el hallazgo radiológico que confirma el diagnóstico de neumotórax?",
+                options: ["Desviación de la tráquea", "Línea pleural visceral separada de la parietal, sin trama vascular, por un espacio hiperclaro", "Aplanamiento diafragmático", "Condensación alveolar"],
                 correct: 1,
                 time: 30
             },
             {
-                q: "¿Cuál es el tratamiento estándar recomendado para la tuberculosis pleural?",
-                options: ["6 meses de Isoniacida sola", "2 meses de R-H-Z y 4 meses de R-H", "9 meses de Rifampicina y Etambutol", "Corticoides sistémicos únicamente"],
+                q: "¿Qué signos clínicos sugieren un Neumotórax a Tensión?",
+                options: ["Dolor leve y tos", "Disnea importante, taquicardia, hipotensión (choque) y abolición del murmullo vesicular", "Hemoptisis franca", "Fiebre y escalofríos"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "¿Qué agente se considera el más eficaz para realizar una pleurodesis en derrame maligno?",
-                options: ["Tetraciclina", "Bleomicina", "Talco", "Nitrato de plata"],
+                q: "¿Cuál es el tratamiento inmediato ante la sospecha clínica de Neumotórax a Tensión?",
+                options: ["Solicitar TAC torácico urgente", "Colocar drenaje pleural sin esperar confirmación radiológica", "Administrar oxígeno y observar", "Realizar fibrobroncoscopia"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué caso se recomienda realizar una TAC torácica?",
+                options: ["En todos los pacientes con neumotórax", "Solo en casos de duda diagnóstica o para diferenciar neumotórax de bulla", "Rutina en el primer episodio de NEP", "Para valorar la pleurodesis"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué tratamiento se recomienda para un Neumotórax Espontáneo Primario (NEP) de escasa cuantía y asintomático?",
+                options: ["Cirugía inmediata", "Drenaje pleural grueso (28F)", "Reposo u observación 24-48h o aspiración simple", "Pleurodesis con talco"],
                 correct: 2,
                 time: 20
             },
             {
-                q: "¿Qué valor de triglicéridos en líquido pleural es diagnóstico de quilotórax?",
-                options: ["Superior a 50 mg/dl", "Superior a 110 mg/dl", "Inferior a 50 mg/dl", "Entre 50 y 110 mg/dl"],
+                q: "¿Cuál es la tasa de absorción espontánea de aire en la cavidad pleural?",
+                options: ["5% cada 24 horas", "1.25% del neumotórax cada 24 horas", "10% cada 24 horas", "No se reabsorbe solo"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "¿Qué característica bioquímica sugiere un derrame pleural por Artritis Reumatoide?",
-                options: ["Glucosa muy baja (< 30-40 mg/dl), pH < 7.20 y LDH > 700 U/l", "Glucosa normal y pH alcalino", "ADA elevado y linfocitosis", "Hematocrito > 50%"],
-                correct: 0,
+                q: "¿Dónde se suele colocar habitualmente el drenaje pleural?",
+                options: ["Línea media axilar 6º espacio", "Línea medio-clavicular 2º espacio o línea axilar anterior 4º espacio", "Línea paravertebral", "Espacio subxifoideo"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuándo se recomienda la cirugía en un paciente con drenaje pleural?",
+                options: ["Si la fuga aérea persiste más de 24 horas", "Si la fuga aérea persiste más de 5 días", "Inmediatamente al colocar el drenaje", "Si el pulmón reexpande"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué complicación se define como la presencia de aire en el mediastino?",
+                options: ["Pioneumotórax", "Neumomediastino", "Hemoneumotórax", "Neumotórax a tensión"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué técnica quirúrgica ha revolucionado el tratamiento del neumotórax por ser menos invasiva?",
+                options: ["Toracotomía posterolateral", "Cirugía Videotoracoscópica (CVT)", "Esternotomía media", "Pleurectomía abierta"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es una indicación de cirugía según la Tabla 2?",
+                options: ["Primer episodio de NEP pequeño", "Fuga aérea persistente (>5 días), profesiones de riesgo, NT bilateral", "Neumotórax iatrogénico pequeño", "Paciente asintomático"],
+                correct: 1,
                 time: 30
             },
             {
-                q: "¿Cómo se define analíticamente un hemotórax?",
-                options: ["Líquido de aspecto rojo", "Presencia de > 10,000 hematíes/ul", "Hematocrito del líquido pleural > 50% del hematocrito sanguíneo", "Hemoglobina en líquido > 5 g/dl"],
-                correct: 2,
-                time: 20
-            },
-            {
-                q: "¿Cuál es la actitud recomendada ante un hemotórax agudo con volumen > 300 ml o inestabilidad?",
-                options: ["Vigilancia clínica", "Toracocentesis evacuadora única", "Colocación de drenaje pleural de grueso calibre (28-32 F)", "Fibrinolíticos inmediatos"],
-                correct: 2,
-                time: 20
-            },
-            {
-                q: "¿Qué característica tiene el derrame pleural precoz (1ª semana) tras cirugía de by-pass aortocoronario?",
-                options: ["Exudado hemorrágico con predominio de eosinófilos", "Trasudado puro", "Exudado linfocitario", "Puruiento"],
-                correct: 0,
-                time: 20
-            },
-            {
-                q: "¿Qué sospechar si en un derrame maligno el pH es < 7.20 o hay engrosamiento visceral marcado?",
-                options: ["Buena respuesta a la pleurodesis", "Pulmón atrapado", "Infección sobreagregada", "Quilotórax"],
+                q: "¿Qué sustancia química es la más utilizada para realizar pleurodesis?",
+                options: ["Tetraciclina", "Talco (5g)", "Bleomicina", "Yodopovidona"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "¿Cuál es la causa más frecuente de quilotórax no traumático?",
-                options: ["Tuberculosis", "Linfangioleiomiomatosis", "Neoplasias (linfomas)", "Insuficiencia cardíaca"],
-                correct: 2,
-                time: 20
+                q: "En un hemotórax traumático, ¿cuándo está indicada la toracotomía exploradora?",
+                options: ["Si hay cualquier cantidad de sangre", "Si el débito inicial es >1500 ml o persiste >200-250 ml/h", "Si hay fracturas costales", "Si el paciente tiene dolor"],
+                correct: 1,
+                time: 30
             },
             {
-                q: "¿Qué parámetros definen un seudoquilotórax?",
-                options: ["Triglicéridos > 110 mg/dl", "Colesterol > 200 mg/dl y/o cristales de colesterol", "Presencia de quilomicrones", "Aspecto lechoso que aclara al centrifugar"],
+                q: "¿Qué es un Neumotórax Iatrogénico?",
+                options: ["El producido por un traumatismo de tráfico", "El producido como consecuencia de un procedimiento diagnóstico o terapéutico (ej. vía central)", "El que ocurre sin causa aparente", "El asociado a la menstruación"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "¿Qué tratamiento ha demostrado aumentar la supervivencia en mesotelioma pleural no quirúrgico?",
-                options: ["Radioterapia sola", "Pleurodesis con talco", "Cisplatino y pemetrexed", "Interferón gamma"],
-                correct: 2,
-                time: 20
-            },
-            {
-                q: "¿Qué indica una amilasa elevada de origen salivar en el líquido pleural?",
-                options: ["Pancreatitis aguda", "Rotura esofágica o neoplasia (adenocarcinoma)", "Tuberculosis", "Artritis reumatoide"],
+                q: "¿Qué recomendación da el texto sobre el pinzamiento del tubo de drenaje antes de retirarlo?",
+                options: ["Está contraindicado", "No existe acuerdo, pero parece una postura aconsejable (48h)", "Es obligatorio en todos los casos", "Solo se hace en niños"],
                 correct: 1,
                 time: 20
             },
             {
-                q: "¿Cuándo está indicada la biopsia pleural cerrada o transparietal?",
-                options: ["En todos los trasudados", "En exudados de etiología desconocida (sospecha de TB o neoplasia)", "Siempre que haya derrame paraneumónico", "Solo si la citología es positiva"],
-                correct: 1,
-                time: 20
-            },
-            {
-                q: "¿Qué síndrome se caracteriza por fiebre y pleuropericarditis semanas después de una lesión cardíaca?",
-                options: ["Síndrome de Meigs", "Síndrome de Dressler", "Síndrome de las uñas amarillas", "Síndrome de vena cava superior"],
-                correct: 1,
-                time: 20
-            },
-            {
-                q: "¿Cuál es el tratamiento de elección para el derrame pleural inducido por fármacos?",
-                options: ["Corticoides sistémicos", "Pleurodesis", "Retirada del medicamento", "Toracocentesis repetidas"],
-                correct: 2,
-                time: 20
-            },
-            {
-                q: "¿Qué complicación pleural benigna es la más frecuente por exposición a asbesto?",
-                options: ["Mesotelioma", "Placas pleurales", "Atelectasia redonda", "Derrame pleural benigno"],
+                q: "¿Cuál es el índice de recidivas tras Cirugía Videotoracoscópica (CVT)?",
+                options: ["0%", "4-6%", "20%", "50%"],
                 correct: 1,
                 time: 20
             }
