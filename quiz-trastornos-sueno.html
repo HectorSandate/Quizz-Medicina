@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Trastornos del Sueño</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .back-button { background: #e0e0e0; color: #333; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; font-weight: bold; transition: all 0.3s ease; }
+        .back-button:hover { background: #d0d0d0; transform: translateX(-5px); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+        @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.5em; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        <h1>Quiz: Trastornos del Sueño y Apnea</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué autor introdujo el término 'síndrome de Pickwick' en la literatura médica en 1956?",
+                options: ["William C. Dement", "Charles Dickens", "Se publicó basado en la descripción de Dickens", "Nathaniel Kleitman"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Quién es considerado el 'padre del sueño' por fundar el primer laboratorio en 1950?",
+                options: ["Giuseppe Moruzzi", "William C. Dement", "Nathaniel Kleitman", "Karl Axel Ekbom"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué prevalencia de obesidad en hombres reportó la Encuesta Nacional de Salud (ENSA) 2000 en comparación con 1993?",
+                options: ["Disminuyó un 5%", "Se mantuvo igual", "Aumentó cerca del 50% (de 24 a 35%)", "Aumentó un 10%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según el texto, ¿qué porcentaje de la mortalidad general se eleva por la presencia de SAHS severo?",
+                options: ["10%", "20%", "30%", "50%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la hormona que interviene en el aumento del apetito y la presencia de obesidad mencionada en el estudio de García y col.?",
+                options: ["Leptina", "Grelina", "Adiponectina", "Insulina"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué efecto tuvo el tratamiento con CPAP por sí solo sobre el peso corporal en el estudio citado?",
+                options: ["Disminuyó significativamente el peso", "No disminuyó el peso corporal ni la resistencia a la insulina", "Aumentó la masa muscular", "Redujo la grasa abdominal"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cómo se define la apnea en adultos según la duración?",
+                options: ["Pausa respiratoria de 3 segundos", "Pausa respiratoria de 5 segundos", "Pausa respiratoria de 10 segundos o más", "Pausa respiratoria de 1 minuto"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el estudio de sueño ideal (Nivel I) según la AASM?",
+                options: ["Oximetría de pulso nocturna", "Poligrafía respiratoria", "Polisomnografía (PSG) asistida por técnico", "Actigrafía"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En la polisomnografía pediátrica, ¿cuál es la duración de referencia para definir una apnea?",
+                options: ["3 segundos", "5 segundos", "10 segundos", "15 segundos"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Qué dispositivo se utiliza en el estudio de Nivel III (Poligrafía)?",
+                options: ["Equipo completo de PSG con EEG", "Dispositivo portátil que mide al menos 4 canales (sin EEG)", "Solo oxímetro de pulso", "Reloj inteligente"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es una limitante importante de la oximetría de pulso nocturna por sí sola para diagnóstico?",
+                options: ["Es muy costosa", "Tiene baja especificidad con criterios cualitativos y baja sensibilidad con cuantitativos", "Requiere hospitalización", "Es dolorosa para el paciente"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué evalúa la Prueba de Latencias Múltiples del Sueño (MSLT)?",
+                options: ["La capacidad de mantenerse despierto", "La tendencia objetiva a quedarse dormido en situaciones monótonas durante el día", "La calidad del sueño nocturno", "El nivel de ronquido"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En la MSLT, ¿qué latencia media de sueño se considera consistente con excesiva somnolencia diurna?",
+                options: ["Menor de 5 minutos", "Menor de 8 minutos", "Entre 10 y 15 minutos", "Mayor de 20 minutos"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué hallazgo en la MSLT apoya el diagnóstico de narcolepsia?",
+                options: ["Latencia media < 8 min y dos o más periodos SOREMP", "Latencia media > 10 min", "Ausencia de sueño REM", "Solo latencia corta sin SOREMP"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Qué mide la Prueba de Mantenimiento de Vigilia (MWT)?",
+                options: ["La tendencia a dormir", "La capacidad objetiva de permanecer despierto", "La arquitectura del sueño", "Las apneas centrales"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el tratamiento inicial de elección (estándar de oro) para el SAHS moderado a severo?",
+                options: ["Cirugía de uvulopalatofaringoplastia", "Dispositivo de avance mandibular", "Presión positiva continua en la vía aérea (CPAP)", "Oxígeno suplementario solo"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Quién describió el dispositivo CPAP nasal en 1981?",
+                options: ["Dement", "Sullivan", "Kleitman", "Dickens"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Según el texto, ¿qué factor aumenta al triple el riesgo de padecer hipertensión arterial?",
+                options: ["Insomnio", "SAHS (Síndrome de Apnea-Hipopnea del Sueño)", "Consumo de café", "Ejercicio intenso"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En el Hospital General del Centro Médico Nacional 'La Raza', ¿qué porcentaje de pacientes estudiados presentaron positividad para trastornos del sueño?",
+                options: ["25%", "50%", "75%", "90%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué estudio se recomienda cuando hay sospecha clínica alta de SAHS pero la poligrafía (Nivel III) resulta negativa?",
+                options: ["Repetir la poligrafía", "Polisomnografía (PSG) completa", "Iniciar tratamiento empírico", "Oximetría"],
+                correct: 1,
+                time: 20
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                const letter = String.fromCharCode(65 + index);
+                optionDiv.textContent = `${letter}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() { document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`; }
+        function updateProgress() { const progress = ((currentQuestion + 1) / questions.length) * 100; document.getElementById('progressBar').style.width = progress + '%'; }
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+        function nextQuestion() { if (currentQuestion < questions.length - 1) { currentQuestion++; displayQuestion(); } }
+        function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; displayQuestion(); } }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+                resultHTML += `<div class="result-item ${resultClass}"><div class="result-question">Pregunta ${index + 1}: ${question.q}</div><div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div><div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div></div>`;
+            });
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `Tu puntuación: ${correctCount}/${questions.length}<br><span style="font-size: 0.6em;">${percentage}% de aciertos</span>`;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

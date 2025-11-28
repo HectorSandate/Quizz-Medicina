@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Fibrosis Pulmonar Idiopática</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .back-button { background: #e0e0e0; color: #333; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; font-weight: bold; transition: all 0.3s ease; }
+        .back-button:hover { background: #d0d0d0; transform: translateX(-5px); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+        @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.5em; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        <h1>Quiz: Fibrosis Pulmonar Idiopática</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué porcentaje de casos de enfermedad pulmonar intersticial (EPI) representa la fibrosis pulmonar idiopática (FPI)?",
+                options: ["25%", "35%", "Aproximadamente 55%", "75%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la supervivencia media reportada para la FPI después del diagnóstico?",
+                options: ["1 a 2 años", "3 a 5 años", "6 a 8 años", "Más de 10 años"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué grupo de edad debe sospecharse principalmente el diagnóstico de FPI?",
+                options: ["Adultos jóvenes (20-30 años)", "Personas menores de 45 años", "Adultos entre la sexta y séptima década de vida (>55 años)", "Niños y adolescentes"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué signos físicos apoyan el diagnóstico de FPI en el 90% de los pacientes?",
+                options: ["Sibilancias espiratorias", "Estertores crepitantes tipo 'velcro' de predominio subescapular", "Frote pleural", "Disminución de ruidos respiratorios"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuánto aumenta el riesgo de FPI tener un antecedente familiar de fibrosis pulmonar?",
+                options: ["2 veces", "3 veces", "5 veces", "9 veces (OR 9.1)"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "Según el Consenso ATS/ERS/JRS/ALAT 2011-2015, ¿cuál es un criterio para el diagnóstico de FPI?",
+                options: ["Presencia de patrón de neumonía intersticial usual (NIU) en TCAR tras excluir otras causas", "Biopsia pulmonar positiva obligatoria en todos los casos", "Lavado bronquioloalveolar positivo", "Elevación de marcadores tumorales"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Qué hallazgo tomográfico representa el rasgo más específico del patrón de neumonía intersticial usual (NIU)?",
+                options: ["Vidrio despulido extenso", "Imagen en 'panal de abeja'", "Nódulos centrolobulillares", "Atrapamiento aéreo"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué valor predictivo positivo tiene la imagen en 'propela' (gradiente apico-basal) para el patrón histológico de NIU?",
+                options: ["50%", "70%", "80%", "90 a 100%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Qué hallazgo en la biopsia pulmonar es necesario para el diagnóstico de patrón NIU por patología?",
+                options: ["Granulomas bien formados", "Presencia de focos de fibroblastos subepiteliales", "Membranas hialinas difusas", "Infiltrado eosinofílico"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿En qué casos es útil el lavado bronquioloalveolar (LBA) según el texto?",
+                options: ["Para diagnosticar FPI en todos los pacientes", "Para descartar diagnósticos diferenciales como neumonitis por hipersensibilidad (linfocitosis >30%)", "Para evaluar la respuesta al tratamiento con pirfenidona", "No tiene utilidad"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cómo se define la exacerbación aguda en fibrosis pulmonar idiopática (EA-FPI)?",
+                options: ["Deterioro lento y progresivo de la función pulmonar", "Empeoramiento agudo de la disnea (< 1 mes) con nuevos cambios en vidrio despulido/consolidación tras excluir otras causas", "Infección respiratoria bacteriana sobreagregada", "Falla cardiaca derecha aguda"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con FPI presentan evidencia radiológica de enfisema pulmonar?",
+                options: ["10%", "30%", "Hasta 50%", "80%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué característica funcional distingue al síndrome combinado de fibrosis pulmonar y enfisema (CPFE)?",
+                options: ["Mecánica pulmonar pseudonormal (espirometría conservada) pero gran deterioro del intercambio gaseoso (DLCO)", "Obstrucción severa al flujo aéreo", "Restricción severa de volúmenes pulmonares", "Hiperreactividad bronquial"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la prevalencia reportada de hipertensión pulmonar (HP) complicando la FPI?",
+                options: ["Menos del 10%", "15-25%", "32-85%", "100%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué incidencia de cáncer pulmonar tienen los pacientes con FPI y tabaquismo intenso (>30 paquetes/año)?",
+                options: ["Igual a la población general", "Doble que la población general", "Siete veces mayor que la población general", "Diez veces mayor"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con FPI se estima que tienen Enfermedad por Reflujo Gastroesofágico (ERGE)?",
+                options: ["30%", "50%", "75%", "Más del 90%"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Qué fármaco antifibrótico redujo la caída de la CVF en un 47.9% en el estudio ASCEND?",
+                options: ["N-acetilcisteína", "Prednisona", "Pirfenidona", "Azatioprina"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el mecanismo de acción del Nintedanib?",
+                options: ["Antagonista de TGF-beta1", "Inhibidor de tirosincinasas (PDGF, VEGF, FGF)", "Antiinflamatorio esteroideo", "Broncodilatador"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué variable utiliza el índice GAP para estadificar la mortalidad en FPI?",
+                options: ["Género, Edad y Fisiología (CVF y DLCO)", "Género, Altura y Peso", "Grado de disnea, Edad y Paquetes/año", "Gasometría, Antecedentes y Patología"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Qué mostró el estudio PANTHER sobre la triple terapia (prednisona, azatioprina, NAC) en FPI?",
+                options: ["Fue el tratamiento más efectivo", "No tuvo diferencias con el placebo", "Fue deletérea, incrementando la mortalidad e ingresos hospitalarios", "Mejoró la calidad de vida"],
+                correct: 2,
+                time: 30
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                const letter = String.fromCharCode(65 + index);
+                optionDiv.textContent = `${letter}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() { document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`; }
+        function updateProgress() { const progress = ((currentQuestion + 1) / questions.length) * 100; document.getElementById('progressBar').style.width = progress + '%'; }
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+        function nextQuestion() { if (currentQuestion < questions.length - 1) { currentQuestion++; displayQuestion(); } }
+        function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; displayQuestion(); } }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+                resultHTML += `<div class="result-item ${resultClass}"><div class="result-question">Pregunta ${index + 1}: ${question.q}</div><div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div><div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div></div>`;
+            });
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `Tu puntuación: ${correctCount}/${questions.length}<br><span style="font-size: 0.6em;">${percentage}% de aciertos</span>`;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Tuberculosis Pulmonar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .back-button { background: #e0e0e0; color: #333; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; font-weight: bold; transition: all 0.3s ease; }
+        .back-button:hover { background: #d0d0d0; transform: translateX(-5px); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+        @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.5em; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        <h1>Quiz: Tuberculosis Pulmonar</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Cómo se transmite Mycobacterium tuberculosis según el texto?",
+                options: ["Por vectores intermediarios (mosquitos)", "Por agua contaminada", "Solamente por diseminación directa de humano a humano", "Por alimentos contaminados"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En la clasificación de la OMS, ¿quiénes pertenecen a la Categoría I (alta prioridad)?",
+                options: ["Casos crónicos y multifármaco-resistentes", "Casos nuevos con baciloscopía positiva o formas severas/VIH", "Casos de recaídas y abandonos", "Casos nuevos con baciloscopía negativa y formas leves"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Según la clasificación de la Sociedad Americana de Tórax (ATS), ¿qué define a la Clase 4?",
+                options: ["Exposición sin infección", "Infección tuberculosa latente, no enfermedad", "Tuberculosis clínicamente activa", "Tuberculosis clínicamente no activa (historia previa o hallazgos estables)"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el indicador más sensible de enfermedad activa?",
+                options: ["La fiebre vespertina", "La hemoptisis", "La pérdida de peso", "La tos (presente por más de 3 semanas)"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Qué cantidad de bacilos se requiere para que una baciloscopía sea positiva?",
+                options: ["100 a 500 bacilos por ml", "1,000 a 2,000 bacilos por ml", "5,000 a 10,000 bacilos por ml", "Más de 100,000 bacilos por ml"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "En el reporte de baciloscopía, ¿qué significa (++)?",
+                options: ["1-10 BAAR en 50 campos", "10-99 BAAR en 100 campos", ">10 BAAR en 20 campos", "1-9 BAAR en 100 campos"],
+                correct: 0,
+                time: 30
+            },
+            {
+                q: "¿Cuántas muestras de esputo establece la Norma Oficial Mexicana para diagnóstico?",
+                options: ["Una muestra", "Dos muestras", "Tres muestras", "Cinco muestras"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la sensibilidad y especificidad del cultivo para micobacterias?",
+                options: ["Sensibilidad 50%, Especificidad 80%", "Sensibilidad 83-93%, Especificidad 98%", "Sensibilidad 100%, Especificidad 100%", "Sensibilidad 60%, Especificidad 90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué puede causar un falso negativo en la prueba de tuberculina (PPD)?",
+                options: ["Vacuna BCG previa", "Infección por micobacterias ambientales", "Enfermedades que afecten la inmunidad celular (VIH/SIDA)", "Lectura a las 24 horas"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuál es la localización radiológica más frecuente de la tuberculosis pulmonar?",
+                options: ["Lóbulo medio", "Bases pulmonares", "Segmento apical/posterior del lóbulo superior o superiores de lóbulos inferiores", "Hilios pulmonares únicamente"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "Según Mitchinson, ¿qué fármaco elimina mejor a los organismos 'semidormidos' extracelulares en material caseoso?",
+                options: ["Isoniacida", "Rifampicina", "Pirazinamida", "Etambutol"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué fármaco actúa mejor en el ambiente intracelular ácido (macrófagos)?",
+                options: ["Estreptomicina", "Etambutol", "Pirazinamida", "Isoniacida"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuáles son los fármacos de la Fase Intensiva para casos nuevos (Norma Oficial Mexicana)?",
+                options: ["Isoniacida y Rifampicina", "Rifampicina, Isoniacida, Pirazinamida y Etambutol", "Isoniacida, Rifampicina y Estreptomicina", "Etionamida, Cicloserina y PAS"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuántas dosis comprende la Fase Intensiva?",
+                options: ["30 dosis", "45 dosis", "60 dosis", "90 dosis"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué define al 'Fracaso de tratamiento'?",
+                options: ["Interrupción del tratamiento por 30 días", "Reaparición de bacilos después de curación", "Persistencia de bacilos al término del tratamiento o reaparición tras negativización", "Intolerancia a los fármacos"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cómo se define la Tuberculosis Multifármaco Resistente (TBMFR)?",
+                options: ["Resistencia a un solo fármaco", "Resistencia simultánea al menos a Isoniacida y Rifampicina", "Resistencia a fármacos de segunda línea", "Resistencia a Isoniacida y Etambutol"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué significa 'Polirresistencia'?",
+                options: ["Resistencia a Isoniacida y Rifampicina", "Resistencia a un solo fármaco", "Resistencia a dos o más agentes de primera línea (distintos a H+R simultáneos)", "Resistencia a quinolonas"],
+                correct: 2,
+                time: 30
+            },
+            {
+                q: "¿Cuáles son los fármacos inyectables de segunda línea?",
+                options: ["Isoniacida, Rifampicina", "Estreptomicina, Kanamicina, Amikacina, Capreomicina", "Ciprofloxacino, Ofloxacino", "Etionamida, Cicloserina"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué estrategia de la OMS se considera la intervención de salud más importante para el control de la TB?",
+                options: ["Vacunación masiva", "DOTS / TAES (Tratamiento Acortado Estrictamente Supervisado)", "Aislamiento total", "Radiografías obligatorias"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En la baciloscopía con técnica fluorescente (auramina rodamina), ¿cómo se observan los bacilos?",
+                options: ["Rojos en fondo azul", "Azules en fondo rojo", "Bastones fluorescentes amarillo-verde o naranja en fondo negro", "Transparentes"],
+                correct: 2,
+                time: 20
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                const letter = String.fromCharCode(65 + index);
+                optionDiv.textContent = `${letter}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() { document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`; }
+        function updateProgress() { const progress = ((currentQuestion + 1) / questions.length) * 100; document.getElementById('progressBar').style.width = progress + '%'; }
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+        function nextQuestion() { if (currentQuestion < questions.length - 1) { currentQuestion++; displayQuestion(); } }
+        function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; displayQuestion(); } }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+                resultHTML += `<div class="result-item ${resultClass}"><div class="result-question">Pregunta ${index + 1}: ${question.q}</div><div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div><div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div></div>`;
+            });
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `Tu puntuación: ${correctCount}/${questions.length}<br><span style="font-size: 0.6em;">${percentage}% de aciertos</span>`;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>

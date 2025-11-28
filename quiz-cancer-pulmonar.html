@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Quiz Cáncer Pulmonar</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); min-height: 100vh; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; border-radius: 20px; padding: 40px; box-shadow: 0 20px 60px rgba(0,0,0,0.3); }
+        .back-button { background: #e0e0e0; color: #333; border: none; padding: 10px 20px; border-radius: 10px; cursor: pointer; margin-bottom: 20px; font-weight: bold; transition: all 0.3s ease; }
+        .back-button:hover { background: #d0d0d0; transform: translateX(-5px); }
+        h1 { color: #667eea; text-align: center; margin-bottom: 30px; font-size: 2em; }
+        .progress-bar { width: 100%; height: 10px; background: #e0e0e0; border-radius: 10px; margin-bottom: 30px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #667eea, #764ba2); transition: width 0.3s ease; }
+        .question-number { color: #667eea; font-weight: bold; margin-bottom: 15px; font-size: 1.1em; }
+        .question-text { font-size: 1.2em; margin-bottom: 25px; color: #333; line-height: 1.6; }
+        .options { display: flex; flex-direction: column; gap: 12px; }
+        .option { padding: 15px 20px; border: 2px solid #e0e0e0; border-radius: 10px; cursor: pointer; transition: all 0.3s ease; background: white; }
+        .option:hover { border-color: #667eea; background: #f5f7ff; transform: translateX(5px); }
+        .option.selected { border-color: #667eea; background: #667eea; color: white; }
+        .timer { text-align: center; font-size: 1.5em; color: #764ba2; margin-bottom: 20px; font-weight: bold; }
+        .controls { display: flex; justify-content: space-between; margin-top: 30px; }
+        button { padding: 12px 30px; border: none; border-radius: 10px; font-size: 1em; cursor: pointer; transition: all 0.3s ease; font-weight: bold; }
+        .btn-next { background: #667eea; color: white; }
+        .btn-prev { background: #e0e0e0; color: #333; }
+        .btn-submit { background: #764ba2; color: white; width: 100%; }
+        .results { display: none; }
+        .results.active { display: block; }
+        .score { text-align: center; font-size: 2.5em; color: #667eea; margin-bottom: 30px; font-weight: bold; }
+        .result-item { margin-bottom: 20px; padding: 20px; border-radius: 10px; border-left: 5px solid; }
+        .result-item.correct { background: #e8f5e9; border-color: #4caf50; }
+        .result-item.incorrect { background: #ffebee; border-color: #f44336; }
+        .result-question { font-weight: bold; margin-bottom: 10px; color: #333; }
+        .your-answer { color: #f44336; }
+        .correct-answer { color: #4caf50; }
+        .btn-restart { background: #667eea; color: white; width: 100%; margin-top: 20px; }
+        @media (max-width: 600px) { .container { padding: 20px; } h1 { font-size: 1.5em; } }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-button" onclick="window.location.href='index.html'">← Volver al Menú</button>
+        <h1>Quiz: Cáncer Pulmonar</h1>
+        
+        <div id="quizSection">
+            <div class="progress-bar"><div class="progress-fill" id="progressBar"></div></div>
+            <div class="timer" id="timer">Tiempo: 20s</div>
+            <div class="question-container">
+                <div class="question-number" id="questionNumber"></div>
+                <div class="question-text" id="questionText"></div>
+                <div class="options" id="options"></div>
+            </div>
+            <div class="controls">
+                <button class="btn-prev" id="prevBtn" onclick="prevQuestion()">← Anterior</button>
+                <button class="btn-next" id="nextBtn" onclick="nextQuestion()">Siguiente →</button>
+                <button class="btn-submit" id="submitBtn" onclick="submitQuiz()" style="display: none;">Finalizar Quiz</button>
+            </div>
+        </div>
+        
+        <div class="results" id="resultsSection">
+            <div class="score" id="score"></div>
+            <div id="resultsList"></div>
+            <button class="btn-restart" onclick="restartQuiz()">Reiniciar Quiz</button>
+            <button class="back-button" onclick="window.location.href='index.html'" style="width: 100%; margin-top: 10px;">← Volver al Menú</button>
+        </div>
+    </div>
+
+    <script>
+        const questionsBank = [
+            {
+                q: "¿Qué función tiene el gen NM23 descubierto por el Instituto Nacional del Cáncer de EUA?",
+                options: ["Estimula la angiogénesis", "Suprime la capacidad de las células tumorales para hacer metástasis", "Aumenta la resistencia a la quimioterapia", "Induce la apoptosis celular"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué es la anaplasia?",
+                options: ["La alteración en la maduración normal de un tejido", "El agrupamiento de células para constituir tejidos", "La ausencia de diferenciación celular", "El fenotipo no correspondiente al sitio topográfico"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué alteración metabólica caracteriza al fenómeno de Warburg en células neoplásicas?",
+                options: ["Incapacidad de producir ácido láctico", "Producción de 5 a 10 veces más ácido láctico por glucólisis incluso en presencia de oxígeno (efecto Pasteur atenuado)", "Dependencia exclusiva de lípidos", "Ausencia de consumo de glucosa"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué marcador tumoral se considera el más valioso y sensible para el carcinoma de células pequeñas (CCP)?",
+                options: ["Antígeno Carcinoembrionario (CEA)", "Calcitonina", "Enolasa Neuroespecífica (NSE)", "Gonadotropina coriónica"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué porcentaje de pacientes con cáncer de pulmón de células pequeñas presenta hiponatremia por secreción inapropiada de hormona antidiurética?",
+                options: ["Menos del 1%", "Hasta en 10% de los casos", "50%", "90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es el principal factor de riesgo para el desarrollo de cáncer broncogénico?",
+                options: ["Exposición a asbesto", "Tabaquismo (consumo de cigarrillos)", "Radón", "Contaminación atmosférica"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la supervivencia a 5 años del cáncer de pulmón de células pequeñas?",
+                options: ["Menos de 5%", "15 a 17%", "30%", "Más de 50%"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "Según la clasificación de 2004, ¿qué carcinoma se caracteriza por células con morfología en 'sal y pimienta' y ausencia de nucleolos?",
+                options: ["Carcinoma epidermoide", "Adenocarcinoma", "Carcinoma de células grandes", "Carcinoma de células pequeñas"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "¿Qué tipo de cáncer pulmonar es más frecuente en mujeres y no fumadores?",
+                options: ["Carcinoma epidermoide", "Adenocarcinoma", "Carcinoma de células pequeñas", "Carcinoma de células grandes"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué caracteriza al síndrome de Pancoast?",
+                options: ["Obstrucción de la vena cava superior", "Tumor en el vértice pulmonar con dolor en cintura escapular y síndrome de Horner", "Disfonía por parálisis del nervio recurrente", "Metástasis cerebrales tempranas"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "En el sistema TNM (edición 2009), ¿cómo se define un tumor T3?",
+                options: ["Tumor < 3 cm", "Tumor > 7 cm o invasión a pared torácica, diafragma o pleura mediastínica", "Invasión a corazón o grandes vasos", "Nódulo separado en lóbulo contralateral"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué define a la etapa N2 en la clasificación TNM?",
+                options: ["Ganglios peribronquiales ipsilaterales", "Ganglios subcarinales o mediastinales ipsilaterales", "Ganglios mediastínicos contralaterales", "Ausencia de ganglios"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "Según el texto, ¿cuál es la mutación oncogénica más frecuente en el adenocarcinoma (hasta 30-50%)?",
+                options: ["K-ras", "Myc", "Bcl-2", "C-erb-B2"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Qué es el 'scar cancer' o carcinoma de la cicatriz?",
+                options: ["Un carcinoma epidermoide en cicatrices de quemaduras", "Una variedad de adenocarcinoma que aparece en lesiones cicatrizales (tuberculosis, fibrosis)", "Un tumor de células pequeñas post-radiación", "Un tumor pleural por asbesto"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Cuál es el gas radiactivo producto de la descomposición del uranio asociado a cáncer pulmonar?",
+                options: ["Radón", "Xenón", "Neón", "Argón"],
+                correct: 0,
+                time: 20
+            },
+            {
+                q: "¿Qué significa 'disección ganglionar sistemática' según el Consenso de Londres 1996?",
+                options: ["Biopsia de un solo ganglio sospechoso", "Evaluación intraoperatoria centrífuga (mediastínica, hiliar, intrapulmonar) idealmente en bloque", "Solo extirpación de ganglios hiliares", "Muestreo aleatorio de ganglios"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "Para certificar un estadio N0 patológico (ausencia de ganglios), ¿cuántos ganglios mínimos recomienda la UICC que debe contener el espécimen?",
+                options: ["Al menos 3", "Al menos 6", "Al menos 10", "Al menos 15"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Dónde se localizan las adenopatías del Nivel 7 según el mapa ganglionar?",
+                options: ["Paratraqueales superiores", "Subaórticas", "Subcarinales", "Hiliares"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la ruta de drenaje linfático principal de los segmentos basales del lóbulo inferior derecho?",
+                options: ["Directo a paratraqueales izquierdas", "Hacia el espacio subcarínico y de ahí a la cadena paratraqueal derecha", "Directo a ganglios escalénicos", "Hacia la ventana aortopulmonar"],
+                correct: 1,
+                time: 30
+            },
+            {
+                q: "¿Qué porcentaje de resecciones completas se puede lograr con un diagnóstico temprano (estadio IA) de cáncer de células no pequeñas?",
+                options: ["Menos del 20%", "45%", "Superiores a 80%", "100%"],
+                correct: 2,
+                time: 20
+            },
+            {
+                q: "¿Qué gen supresor se encuentra alterado con mayor frecuencia en el carcinoma epidermoide?",
+                options: ["K-ras", "P53", "Bcl-2", "Myc"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Cuál es la supervivencia a 5 años en pacientes con resección completa (disección sistemática) según el texto?",
+                options: ["10%", "Hasta 45%", "70%", "90%"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "En el cáncer de células no pequeñas, ¿qué marcadores neuroendocrinos pueden expresarse ocasionalmente?",
+                options: ["Solo CEA", "Cromogranina A, Leu 7 y NSE", "Solo Calcitonina", "Ninguno, son exclusivos de células pequeñas"],
+                correct: 1,
+                time: 20
+            },
+            {
+                q: "¿Qué estudio se considera el estándar de oro para el diagnóstico de cáncer pulmonar?",
+                options: ["Radiografía de tórax", "TAC", "PET-scan", "Estudio histológico de biopsia"],
+                correct: 3,
+                time: 20
+            },
+            {
+                q: "Según el texto, ¿qué efecto tiene la quimioterapia adyuvante en tumores T1-2 N0-1 resecados?",
+                options: ["No se menciona", "Empeora el pronóstico", "Permite mejorar la supervivencia gracias a la precisión diagnóstica de la disección sistemática", "Es el único tratamiento necesario"],
+                correct: 2,
+                time: 30
+            }
+        ];
+
+        function shuffleArray(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+
+        let questions = shuffleArray(questionsBank);
+        let currentQuestion = 0;
+        let userAnswers = [];
+        let timeLeft = 0;
+        let timerInterval;
+
+        function displayQuestion() {
+            const question = questions[currentQuestion];
+            document.getElementById('questionNumber').textContent = `Pregunta ${currentQuestion + 1} de ${questions.length}`;
+            document.getElementById('questionText').textContent = question.q;
+            const optionsContainer = document.getElementById('options');
+            optionsContainer.innerHTML = '';
+            question.options.forEach((option, index) => {
+                const optionDiv = document.createElement('div');
+                optionDiv.className = 'option';
+                if (userAnswers[currentQuestion] === index) {
+                    optionDiv.classList.add('selected');
+                }
+                optionDiv.textContent = `${String.fromCharCode(97 + index)}) ${option}`;
+                optionDiv.onclick = () => selectOption(index);
+                optionsContainer.appendChild(optionDiv);
+            });
+            updateProgress();
+            updateButtons();
+            startTimer(question.time);
+        }
+
+        function selectOption(index) {
+            userAnswers[currentQuestion] = index;
+            const options = document.querySelectorAll('.option');
+            options.forEach((opt, i) => {
+                opt.classList.toggle('selected', i === index);
+            });
+        }
+
+        function startTimer(seconds) {
+            clearInterval(timerInterval);
+            timeLeft = seconds;
+            updateTimerDisplay();
+            timerInterval = setInterval(() => {
+                timeLeft--;
+                updateTimerDisplay();
+                if (timeLeft <= 0) {
+                    clearInterval(timerInterval);
+                    if (currentQuestion < questions.length - 1) nextQuestion();
+                }
+            }, 1000);
+        }
+
+        function updateTimerDisplay() { document.getElementById('timer').textContent = `Tiempo: ${timeLeft}s`; }
+        function updateProgress() { const progress = ((currentQuestion + 1) / questions.length) * 100; document.getElementById('progressBar').style.width = progress + '%'; }
+        function updateButtons() {
+            document.getElementById('prevBtn').style.display = currentQuestion === 0 ? 'none' : 'block';
+            document.getElementById('nextBtn').style.display = currentQuestion === questions.length - 1 ? 'none' : 'block';
+            document.getElementById('submitBtn').style.display = currentQuestion === questions.length - 1 ? 'block' : 'none';
+        }
+        function nextQuestion() { if (currentQuestion < questions.length - 1) { currentQuestion++; displayQuestion(); } }
+        function prevQuestion() { if (currentQuestion > 0) { currentQuestion--; displayQuestion(); } }
+
+        function submitQuiz() {
+            clearInterval(timerInterval);
+            let correctCount = 0;
+            let resultHTML = '';
+            questions.forEach((question, index) => {
+                const userAnswer = userAnswers[index];
+                const isCorrect = userAnswer === question.correct;
+                if (isCorrect) correctCount++;
+                const resultClass = isCorrect ? 'correct' : 'incorrect';
+                const userAnswerText = userAnswer !== undefined ? question.options[userAnswer] : 'Sin responder';
+                const correctAnswerText = question.options[question.correct];
+                resultHTML += `<div class="result-item ${resultClass}"><div class="result-question">Pregunta ${index + 1}: ${question.q}</div><div class="result-answer your-answer">Tu respuesta: ${userAnswerText}</div><div class="result-answer correct-answer">Respuesta correcta: ${correctAnswerText}</div></div>`;
+            });
+            const percentage = ((correctCount / questions.length) * 100).toFixed(1);
+            document.getElementById('score').innerHTML = `Tu puntuación: ${correctCount}/${questions.length}<br><span style="font-size: 0.6em;">${percentage}% de aciertos</span>`;
+            document.getElementById('resultsList').innerHTML = resultHTML;
+            document.getElementById('quizSection').style.display = 'none';
+            document.getElementById('resultsSection').classList.add('active');
+        }
+
+        function restartQuiz() {
+            questions = shuffleArray(questionsBank);
+            currentQuestion = 0;
+            userAnswers = [];
+            document.getElementById('quizSection').style.display = 'block';
+            document.getElementById('resultsSection').classList.remove('active');
+            displayQuestion();
+        }
+
+        displayQuestion();
+    </script>
+</body>
+</html>
